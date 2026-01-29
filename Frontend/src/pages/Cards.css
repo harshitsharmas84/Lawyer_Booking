@@ -1,8 +1,19 @@
 /* ===== WRAPPER ===== */
 .top-lawyers-wrapper {
   width: 100%;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  padding: 70px 0;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  padding: 90px 0;
+  position: relative;
+}
+
+.top-lawyers-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.5), transparent);
 }
 
 /* ===== SECTION ===== */
@@ -15,86 +26,138 @@
 
 /* ===== HEADINGS ===== */
 .top-lawyers h2 {
-  font-size: 34px;
-  font-weight: 800;
-  color: #f8fafc;
-  margin-bottom: 8px;
+  font-size: 42px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f8fafc, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
 }
 
 .top-lawyers p {
-  font-size: 15px;
-  color: #cbd5e1;
-  margin-bottom: 40px;
+  font-size: 16px;
+  color: #94a3b8;
+  margin-bottom: 50px;
 }
 
 /* ===== GRID ===== */
 .lawyer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
   justify-items: center;
 }
 
 /* ===== CARD ===== */
 .lawyer-card {
-  background: #ffffff;
-  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-  max-width: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 320px;
   width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.lawyer-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa, #ec4899);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.lawyer-card:hover::before {
+  opacity: 1;
 }
 
 .lawyer-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.35);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 20px 50px rgba(96, 165, 250, 0.4);
+  border-color: rgba(96, 165, 250, 0.5);
 }
 
 /* ===== IMAGE ===== */
 .lawyer-card img {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: contain;
-  background: #f1f5f9;
-  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc, #e0f2fe);
+  padding: 20px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lawyer-card:hover img {
+  transform: scale(1.1);
 }
 
 /* ===== INFO ===== */
 .lawyer-info {
-  padding: 16px;
+  padding: 20px;
   text-align: left;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 100%);
 }
 
 /* ===== STATUS ===== */
 .status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
   color: #16a34a;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: #22c55e;
   border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
 }
 
 /* ===== TEXT ===== */
 .lawyer-info h4 {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: #0f172a;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.lawyer-card:hover .lawyer-info h4 {
+  color: #6366f1;
 }
 
 .lawyer-info p {
-  font-size: 13px;
-  color: #475569;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 /* ===== RESPONSIVE ===== */
