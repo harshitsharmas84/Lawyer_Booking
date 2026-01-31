@@ -1,222 +1,162 @@
-import "./Cards.css";
+import { MapPin, Phone, Trophy, Clock, Star } from 'lucide-react';
 
 const lawyers = [
   {
     name: "Adv. Rahul Sharma",
     type: "Criminal Lawyer",
-    image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop&q=80",
+    cover: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600&h=300&fit=crop",
     available: true,
     rating: 4.8,
     cases: 150,
+    experience: "12 Yrs",
+    email: "rahul.sharma@firm.com",
+    phone: "+91 98765 43210",
+    location: "Mumbai, MH",
+    about: "Specializing in criminal defense with a proven track record in high-profile cases.",
+    specializations: ["Criminal Defense", "White Collar Crime", "Appeals"],
   },
   {
     name: "Adv. Neha Verma",
     type: "Family Lawyer",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&q=80",
+    cover: "https://images.unsplash.com/photo-1505664194779-8beaceb930b5?w=600&h=300&fit=crop",
     available: true,
     rating: 4.9,
     cases: 120,
+    experience: "10 Yrs",
+    email: "neha.verma@firm.com",
+    phone: "+91 98765 43211",
+    location: "Delhi, NCR",
+    about: "Compassionate family law expert focused on amicable resolutions and child welfare.",
+    specializations: ["Divorce", "Child Custody", "Adoption"],
   },
   {
     name: "Adv. Aman Gupta",
     type: "Corporate Lawyer",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    available: true,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80",
+    cover: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=300&fit=crop",
+    available: false,
     rating: 4.7,
     cases: 200,
+    experience: "15 Yrs",
+    email: "aman.gupta@firm.com",
+    phone: "+91 98765 43212",
+    location: "Bangalore, KA",
+    about: "Corporate law specialist with extensive M&A and compliance expertise.",
+    specializations: ["M&A", "Corporate Compliance", "Contract Law"],
   },
   {
     name: "Adv. Riya Malhotra",
     type: "Property Lawyer",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&q=80",
+    cover: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=300&fit=crop",
     available: true,
     rating: 4.6,
     cases: 95,
-  },
-  {
-    name: "Adv. Kunal Mehta",
-    type: "Cyber Lawyer",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.9,
-    cases: 180,
-  },
-  {
-    name: "Adv. Tanya Kashyap",
-    type: "Civil Lawyer",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.8,
-    cases: 160,
-  },
-  {
-    name: "Adv. Vikram Singh",
-    type: "Criminal Lawyer",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.7,
-    cases: 140,
-  },
-  {
-    name: "Adv. Priya Desai",
-    type: "Family Lawyer",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
-    available: false,
-    rating: 4.6,
-    cases: 110,
-  },
-  {
-    name: "Adv. Arjun Reddy",
-    type: "Corporate Lawyer",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.8,
-    cases: 175,
-  },
-  {
-    name: "Adv. Sneha Patel",
-    type: "Property Lawyer",
-    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.7,
-    cases: 130,
-  },
-  {
-    name: "Adv. Rohit Kumar",
-    type: "Cyber Lawyer",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.9,
-    cases: 165,
-  },
-  {
-    name: "Adv. Anjali Nair",
-    type: "Civil Lawyer",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.8,
-    cases: 145,
-  },
-  {
-    name: "Adv. Karan Joshi",
-    type: "Criminal Lawyer",
-    image: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.6,
-    cases: 125,
-  },
-  {
-    name: "Adv. Divya Iyer",
-    type: "Family Lawyer",
-    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.9,
-    cases: 155,
-  },
-  {
-    name: "Adv. Nikhil Saxena",
-    type: "Corporate Lawyer",
-    image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&h=400&fit=crop",
-    available: false,
-    rating: 4.7,
-    cases: 190,
-  },
-  {
-    name: "Adv. Pooja Bhatt",
-    type: "Property Lawyer",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.8,
-    cases: 135,
-  },
-  {
-    name: "Adv. Sanjay Rao",
-    type: "Cyber Lawyer",
-    image: "https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.9,
-    cases: 170,
-  },
-  {
-    name: "Adv. Meera Kapoor",
-    type: "Civil Lawyer",
-    image: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.7,
-    cases: 142,
-  },
-  {
-    name: "Adv. Aditya Menon",
-    type: "Criminal Lawyer",
-    image: "https://images.unsplash.com/photo-1489980557514-251d61e3eeb6?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.8,
-    cases: 158,
-  },
-  {
-    name: "Adv. Kavya Shah",
-    type: "Family Lawyer",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop",
-    available: true,
-    rating: 4.9,
-    cases: 163,
+    experience: "8 Yrs",
+    email: "riya.malhotra@firm.com",
+    phone: "+91 98765 43213",
+    location: "Pune, MH",
+    about: "Real estate law expert helping clients navigate property transactions smoothly.",
+    specializations: ["Property Disputes", "Real Estate", "Verification"],
   },
 ];
 
+const LawyerCard = ({ lawyer }) => {
+  return (
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+      {/* Header with cover image */}
+      <div className="relative">
+        <div 
+          className="h-32 bg-cover bg-center"
+          style={{ backgroundImage: `url(${lawyer.cover || lawyer.image})` }}
+        />
+        
+        {/* Status Badge */}
+        <span className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+          lawyer.available 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${lawyer.available ? 'bg-green-500' : 'bg-red-500'}`} />
+          {lawyer.available ? 'Available' : 'Booked'}
+        </span>
+
+        {/* Avatar */}
+        <img 
+          className="absolute left-1/2 -translate-x-1/2 -bottom-10 w-20 h-20 rounded-full object-cover border-4 border-white shadow-md" 
+          src={lawyer.image} 
+          alt={lawyer.name} 
+        />
+      </div>
+
+      {/* Card Body */}
+      <div className="pt-12 pb-6 px-6">
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">{lawyer.name}</h3>
+          <p className="text-sm text-blue-600 font-medium">{lawyer.type}</p>
+        </div>
+
+        <p className="text-gray-600 text-sm text-center mb-4 line-clamp-2">{lawyer.about}</p>
+        
+        {/* Contact Info */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="w-4 h-4 text-gray-400" />
+            <span>{lawyer.location}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Phone className="w-4 h-4 text-gray-400" />
+            <span>{lawyer.phone}</span>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+            <Trophy className="w-5 h-5 text-blue-600" />
+            <div>
+              <div className="text-sm font-semibold text-gray-900">{lawyer.cases}+</div>
+              <div className="text-xs text-gray-500">Wins</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+            <Clock className="w-5 h-5 text-blue-600" />
+            <div>
+              <div className="text-sm font-semibold text-gray-900">{lawyer.experience}</div>
+              <div className="text-xs text-gray-500">Exp</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg">
+            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+            <div>
+              <div className="text-sm font-semibold text-gray-900">{lawyer.rating}</div>
+              <div className="text-xs text-gray-500">Rating</div>
+            </div>
+          </div>
+        </div>
+        
+        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors">
+          Book Consultation
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const TopLawyers = () => {
   return (
-    <section className="top-lawyers-wrapper">
-      <div className="top-lawyers">
-        <h2>Top Lawyers to Book</h2>
-        <p>Simply browse through our trusted and verified lawyers.</p>
+    <section className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Top Lawyers to Book</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">Simply browse through our trusted and verified lawyers available for consultation.</p>
+        </div>
 
-        <div className="lawyer-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {lawyers.map((lawyer, index) => (
-            <div className="lawyer-card" key={index}>
-              <div className="card-image-wrapper">
-                <img src={lawyer.image} alt={lawyer.name} />
-                <div className="card-overlay">
-                  <button className="btn-primary">Book Appointment</button>
-                  <button className="btn-secondary">View Profile</button>
-                </div>
-                <span className={`status-badge ${lawyer.available ? 'available' : 'unavailable'}`}>
-                  <span className="dot"></span>
-                  {lawyer.available ? 'Available' : 'Unavailable'}
-                </span>
-              </div>
-
-              <div className="lawyer-info">
-                <div className="info-header">
-                  <div>
-                    <h4>{lawyer.name}</h4>
-                    <p className="specialty">{lawyer.type}</p>
-                  </div>
-                  <div className="rating">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    <span>{lawyer.rating}</span>
-                  </div>
-                </div>
-                
-                <div className="stats">
-                  <div className="stat-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 3h18v18H3z"/>
-                      <path d="M21 9H3M21 15H3M9 3v18"/>
-                    </svg>
-                    <span>{lawyer.cases}+ Cases</span>
-                  </div>
-                  <div className="stat-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    <span>Verified</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <LawyerCard key={index} lawyer={lawyer} />
           ))}
         </div>
       </div>
