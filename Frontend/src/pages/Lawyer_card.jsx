@@ -1,4 +1,6 @@
+import React from "react";
 import "./Lawyer_card.css";
+import "./Cards.css";
 
 const lawyers = [
   { name: "Adv. Rahul Sharma", type: "Criminal Lawyer", image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop", available: true, rating: 4.7, cases: 145 },
@@ -23,6 +25,99 @@ const lawyers = [
   { name: "Adv. Kavya Shah", type: "Family Lawyer", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop", available: true, rating: 4.9, cases: 163 },
 ];
 
+const enrichLawyer = (lawyer, index) => ({
+    ...lawyer,
+    cover: `https://images.unsplash.com/photo-${[
+        '1589829085413-56de8ae18c73', 
+        '1505664194779-8beaceb930b5', 
+        '1486406146926-c627a92ad1ab', 
+        '1450101499163-c8848c66ca85'
+    ][index % 4]}?w=600&h=300&fit=crop`,
+    experience: `${Math.floor(Math.random() * 10) + 5} Yrs`,
+    location: ["Mumbai, MH", "Delhi, NCR", "Bangalore, KA", "Pune, MH"][index % 4],
+    phone: "+91 98765 4321" + (index % 10),
+    about: "Dedicated legal professional committed to providing top-tier representation and achieving favorable outcomes for clients."
+});
+
+const SingleLawyerCard = ({ lawyer }) => {
+  return (
+    <div className="lawyer-card-profile">
+      <div className="card-header">
+        <div 
+          className="card-cover" 
+          style={{ backgroundImage: `url(${lawyer.cover || lawyer.image})` }}
+        ></div>
+        
+        <span className={`status-badge ${lawyer.available ? 'available' : 'unavailable'}`}>
+          <span className="dot"></span>
+          {lawyer.available ? 'Available' : 'Booked'}
+        </span>
+
+        <img className="card-avatar" src={lawyer.image} alt={lawyer.name} />
+        
+        <div className="card-fullname">{lawyer.name}</div>
+        <div className="card-specialty">{lawyer.type}</div>
+      </div>
+
+      <div className="card-main">
+        <div className="card-section">
+          <p className="card-desc">{lawyer.about}</p>
+          
+          <div className="card-contact-info">
+            <div className="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>{lawyer.location}</span>
+            </div>
+            <div className="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span>{lawyer.phone}</span>
+            </div>
+          </div>
+
+          <div className="card-stats-grid">
+            <div className="stat-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <div>
+                <div className="stat-value">{lawyer.cases}+</div>
+                <div className="stat-label">Wins</div>
+              </div>
+            </div>
+            <div className="stat-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <div>
+                <div className="stat-value">{lawyer.experience}</div>
+                <div className="stat-label">Exp</div>
+              </div>
+            </div>
+            <div className="stat-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <div>
+                <div className="stat-value">{lawyer.rating}</div>
+                <div className="stat-label">Rating</div>
+              </div>
+            </div>
+          </div>
+          
+          <button className="book-btn">Book Consultation</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Lawyer_card = ({ selected }) => {
   const filteredLawyers = selected === "All" 
     ? lawyers 
@@ -31,55 +126,7 @@ const Lawyer_card = ({ selected }) => {
   return (
     <div className="right">
       {filteredLawyers.map((lawyer, index) => (
-        <div className="card" key={index}>
-          <div className="card-image-wrapper">
-            <div className="img" style={{ 
-              backgroundImage: `url(${lawyer.image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}></div>
-            <div className="card-overlay">
-              <button className="btn-primary">Book Appointment</button>
-              <button className="btn-secondary">View Profile</button>
-            </div>
-            <span className={`status-badge ${lawyer.available ? 'available' : 'unavailable'}`}>
-              <span className="dot"></span>
-              {lawyer.available ? 'Available' : 'Unavailable'}
-            </span>
-          </div>
-
-          <div className="lawyer-info">
-            <div className="info-header">
-              <div>
-                <h4>{lawyer.name}</h4>
-                <p className="specialty">{lawyer.type}</p>
-              </div>
-              <div className="rating">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <span>{lawyer.rating}</span>
-              </div>
-            </div>
-            
-            <div className="stats">
-              <div className="stat-item">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 3h18v18H3z"/>
-                  <path d="M21 9H3M21 15H3M9 3v18"/>
-                </svg>
-                <span>{lawyer.cases}+ Cases</span>
-              </div>
-              <div className="stat-item">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-                <span>Verified</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SingleLawyerCard key={index} lawyer={enrichLawyer(lawyer, index)} />
       ))}
     </div>
   );
