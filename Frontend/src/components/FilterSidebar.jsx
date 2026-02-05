@@ -84,7 +84,12 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
     (filters.casesWonRange[0] > 0 || filters.casesWonRange[1] < 350 ? 1 : 0) +
     (filters.costRange[0] > 0 || filters.costRange[1] < 25000 ? 1 : 0);
 
-  const FilterContent = () => (
+  /* 
+   * This was previously a component defined inside another component, which causes
+   * focus loss on re-renders because React treats it as a new component type.
+   * Changing it to a render function fixes the issue.
+   */
+  const renderFilterContent = () => (
     <div className="p-4 lg:p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">Filters</h2>
@@ -162,7 +167,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.experienceRange[0]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  experienceRange: [Number(e.target.value), filters.experienceRange[1]]
+                  experienceRange: [e.target.value === '' ? '' : Number(e.target.value), filters.experienceRange[1]]
                 })}
                 className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -174,7 +179,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.experienceRange[1]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  experienceRange: [filters.experienceRange[0], Number(e.target.value)]
+                  experienceRange: [filters.experienceRange[0], e.target.value === '' ? '' : Number(e.target.value)]
                 })}
                 className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -182,7 +187,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
             <DualRangeSlider
               min={0}
               max={25}
-              value={filters.experienceRange}
+              value={[Number(filters.experienceRange[0]), Number(filters.experienceRange[1])]}
               onChange={(value) => setFilters({ ...filters, experienceRange: value })}
             />
           </div>
@@ -208,7 +213,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.casesWonRange[0]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  casesWonRange: [Number(e.target.value), filters.casesWonRange[1]]
+                  casesWonRange: [e.target.value === '' ? '' : Number(e.target.value), filters.casesWonRange[1]]
                 })}
                 className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -220,7 +225,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.casesWonRange[1]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  casesWonRange: [filters.casesWonRange[0], Number(e.target.value)]
+                  casesWonRange: [filters.casesWonRange[0], e.target.value === '' ? '' : Number(e.target.value)]
                 })}
                 className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -228,7 +233,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
             <DualRangeSlider
               min={0}
               max={350}
-              value={filters.casesWonRange}
+              value={[Number(filters.casesWonRange[0]), Number(filters.casesWonRange[1])]}
               onChange={(value) => setFilters({ ...filters, casesWonRange: value })}
             />
           </div>
@@ -284,7 +289,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.costRange[0]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  costRange: [Number(e.target.value), filters.costRange[1]]
+                  costRange: [e.target.value === '' ? '' : Number(e.target.value), filters.costRange[1]]
                 })}
                 className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -297,7 +302,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 value={filters.costRange[1]}
                 onChange={(e) => setFilters({
                   ...filters,
-                  costRange: [filters.costRange[0], Number(e.target.value)]
+                  costRange: [filters.costRange[0], e.target.value === '' ? '' : Number(e.target.value)]
                 })}
                 className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
               />
@@ -306,7 +311,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
               min={0}
               max={25000}
               step={1000}
-              value={filters.costRange}
+              value={[Number(filters.costRange[0]), Number(filters.costRange[1])]}
               onChange={(value) => setFilters({ ...filters, costRange: value })}
             />
             <p className="text-xs text-gray-500">
@@ -377,7 +382,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <FilterContent />
+            {renderFilterContent()}
             <div className="sticky bottom-0 bg-white border-t p-4">
               <button
                 onClick={() => setMobileOpen(false)}
@@ -392,7 +397,7 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-80 bg-white border-r border-gray-200 h-screen overflow-y-auto sticky top-0">
-        <FilterContent />
+        {renderFilterContent()}
       </aside>
     </>
   );
