@@ -53,7 +53,9 @@ export function createApp() {
 
     // CORS
     app.use(cors({
-        origin: env.FRONTEND_URL,
+        origin: env.FRONTEND_URL.includes(',')
+            ? env.FRONTEND_URL.split(',').map(url => url.trim())
+            : env.FRONTEND_URL,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
