@@ -72,8 +72,16 @@ export function createApp() {
     // Request logging
     app.use(requestLogger);
 
-    // Body parsing
-    app.use(express.json({ limit: '10mb' }));
+    // Body parsing — preserve raw body for webhook signature verification
+    app.use(express.json({
+        limit: '10mb',
+        verify: (req, _res, buf) => {
+            // Save raw body buffer for routes that need HMAC verification
+            if (req.originalUrl?.includes('/payments/webhook')) {
+                req.rawBody = buf;
+            }
+        },
+    }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
     // ─────────────────────────────────────────────────────────────────────────

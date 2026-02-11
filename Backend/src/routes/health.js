@@ -12,7 +12,7 @@
 
 import express from 'express';
 import env from '../config/env.js';
-import { prisma } from '../config/database.js';
+import { getDatabaseHealth } from '../utils/health.js';
 
 const router = express.Router();
 
@@ -36,30 +36,35 @@ router.get('/live', (req, res) => {
  * Use for Kubernetes readinessProbe.
  */
 router.get('/ready', async (req, res) => {
-    const checks = {
-        database: { status: 'unknown' },
-    };
-
     try {
-        // Check PostgreSQL connectivity
-        await prisma.$queryRaw`SELECT 1`;
-        checks.database = { status: 'connected' };
+        const health = await getDatabaseHealth();
+        const isReady = health.overall === 'healthy';
+
+        res.status(isReady ? 200 : 503).json({
+            status: isReady ? 'ready' : 'not ready',
+            timestamp: new Date().toISOString(),
+            environment: env.NODE_ENV,
+            version: process.env.npm_package_version || '1.0.0',
+            databases: {
+                postgresql: {
+                    status: health.postgresql.status,
+                    latency: health.postgresql.latency,
+                    ...(env.isDevelopment && health.postgresql.error && { error: health.postgresql.error }),
+                },
+                mongodb: {
+                    status: health.mongodb.status,
+                    latency: health.mongodb.latency,
+                    ...(env.isDevelopment && health.mongodb.error && { error: health.mongodb.error }),
+                },
+            },
+        });
     } catch (error) {
-        checks.database = {
-            status: 'disconnected',
-            error: env.isDevelopment ? error.message : 'Connection failed',
-        };
+        res.status(503).json({
+            status: 'error',
+            timestamp: new Date().toISOString(),
+            error: env.isDevelopment ? error.message : 'Health check failed',
+        });
     }
-
-    const allHealthy = Object.values(checks).every(c => c.status === 'connected');
-
-    res.status(allHealthy ? 200 : 503).json({
-        status: allHealthy ? 'ready' : 'not ready',
-        timestamp: new Date().toISOString(),
-        environment: env.NODE_ENV,
-        version: process.env.npm_package_version || '1.0.0',
-        checks,
-    });
 });
 
 /**

@@ -216,7 +216,7 @@ export default function DashboardLayout({ role = 'user' }) {
 
         return (
             <img
-                src={user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${config.avatarSeed}`}
+                src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${config.avatarSeed}`}
                 alt={displayName}
                 className="w-9 h-9 rounded-full object-cover"
             />

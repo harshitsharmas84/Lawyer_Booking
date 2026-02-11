@@ -17,6 +17,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./layouts/Layout";
 import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardRedirect from "./components/DashboardRedirect";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LOADING COMPONENT
@@ -43,7 +44,7 @@ const withSuspense = (Component) => (
 // ═══════════════════════════════════════════════════════════════════════════
 
 const Home = lazy(() => import("./pages/Home"));
-const Lawyers = lazy(() => import("./pages/All_lawyer"));
+const Lawyers = lazy(() => import("./pages/AllLawyers"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -125,10 +126,18 @@ const router = createBrowserRouter([
           { path: "signup", element: withSuspense(Signup) },
           { path: "verify-email", element: withSuspense(VerifyEmail) },
           // Legacy routes (for backward compatibility)
-          { path: "All_lawyer", element: withSuspense(Lawyers) },
           { path: "About", element: withSuspense(About) },
           { path: "Contact", element: withSuspense(Contact) },
         ],
+      },
+
+
+      // ─────────────────────────────────────────────────────────────────
+      // Unified Dashboard Redirect
+      // ─────────────────────────────────────────────────────────────────
+      {
+        path: "/dashboard",
+        element: <DashboardRedirect />,
       },
 
       // ─────────────────────────────────────────────────────────────────

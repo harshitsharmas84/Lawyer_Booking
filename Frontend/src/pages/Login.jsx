@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { Mail, Lock, User, Scale, ShieldCheck, ArrowRight, Eye, EyeOff, Sparkles, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles, AlertCircle, Scale, ShieldCheck } from 'lucide-react';
+import { LOGIN_ROLES } from '../constants/roles';
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -15,11 +16,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const roles = [
-    { id: "User", icon: User, label: "Client", desc: "Book consultations" },
-    { id: "Lawyer", icon: Scale, label: "Lawyer", desc: "Manage appointments" },
-    { id: "Admin", icon: ShieldCheck, label: "Admin", desc: "Full access" },
-  ];
+  const roles = LOGIN_ROLES;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

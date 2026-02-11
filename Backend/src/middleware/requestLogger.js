@@ -22,9 +22,9 @@ import logger from '../utils/logger.js';
 export function requestLogger(req, res, next) {
     const startTime = Date.now();
 
-    // Log request start
-    const requestId = Math.random().toString(36).substring(7);
-    req.requestId = requestId;
+    // Use the UUID set by requestId middleware (runs before this)
+    // Do NOT generate a second ID — it breaks distributed tracing
+    const requestId = req.id;
 
     // Store original end function
     const originalEnd = res.end;
