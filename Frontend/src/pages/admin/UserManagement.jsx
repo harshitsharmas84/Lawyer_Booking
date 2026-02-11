@@ -29,7 +29,7 @@ export default function UserManagement() {
             setUsers(users);
         } catch (error) {
             console.error('Failed to fetch users:', error);
-            setUsers([]); // No mock data - show empty state for real errors
+            setUsers([]); 
         } finally {
             setLoading(false);
         }
