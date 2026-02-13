@@ -86,19 +86,23 @@ export const lawyerAPI = {
     },
 
     async updateProfile(lawyerId, data) {
-        // data contains frontend fields: specialty, languages, etc.
-        // We need to map them to backend expected fields.
-        // Backend expects: bio, headline, hourlyRate, city, state, address, availability, languages.
-        // Frontend sends 'profile' object which has specific structure.
+        // Map frontend fields to backend expected fields
+        const nameParts = data.name ? data.name.split(' ') : [];
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
 
         const payload = {
+            firstName,
+            lastName,
+            phone: data.phone,
             bio: data.description, // 'description' mapped to 'bio'
-            headline: data.headline, // if exists
-            hourlyRate: data.avgCostPerCase, // mapped
-            city: data.location?.split(',')[0]?.trim(), // simple parsing if location is string
+            headline: data.headline,
+            hourlyRate: data.consultationFee || data.avgCostPerCase, // Map consultation fee to hourly rate
+            city: data.location?.split(',')[0]?.trim(),
             state: data.location?.split(',')[1]?.trim(),
             languages: data.languages,
-            // specializations: handled separately or ignored for now?
+            experience: data.experience,
+            specializations: data.specialty, // Array of specialty names
         };
 
         const response = await apiClient.put('/lawyers/profile', payload);

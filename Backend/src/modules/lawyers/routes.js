@@ -544,34 +544,88 @@ router.get('/:id/availability', asyncHandler(async (req, res) => {
  */
 router.put('/profile', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
     const prisma = getPrismaClient();
-    const { bio, headline, hourlyRate, city, state, address, availability, languages } = req.body;
+    const {
+        firstName, lastName, phone, // User fields
+        bio, headline, hourlyRate, city, state, address, availability, languages, experience, // Lawyer fields
+        specializations // Array of practice area names or slugs
+    } = req.body;
 
-    const lawyer = await prisma.lawyer.update({
-        where: { userId: req.user.id },
-        data: {
-            bio: bio !== undefined ? bio : undefined,
-            headline: headline !== undefined ? headline : undefined,
-            hourlyRate: hourlyRate !== undefined ? hourlyRate : undefined,
-            city: city !== undefined ? city : undefined,
-            state: state !== undefined ? state : undefined,
-            address: address !== undefined ? address : undefined,
-            availability: availability !== undefined ? availability : undefined,
-            languages: languages !== undefined ? languages : undefined,
-        },
-        select: {
-            id: true,
-            bio: true,
-            headline: true,
-            hourlyRate: true,
-            city: true,
-            state: true,
-            isAvailable: true,
-        },
+    // Use transaction to update all related data
+    const updatedLawyer = await prisma.$transaction(async (tx) => {
+        // 1. Update User details
+        if (firstName || lastName || phone) {
+            await tx.user.update({
+                where: { id: req.user.id },
+                data: {
+                    firstName: firstName || undefined,
+                    lastName: lastName || undefined,
+                    phone: phone || undefined,
+                }
+            });
+        }
+
+        // 2. Update Lawyer details
+        const lawyer = await tx.lawyer.update({
+            where: { userId: req.user.id },
+            data: {
+                bio: bio !== undefined ? bio : undefined,
+                headline: headline !== undefined ? headline : undefined,
+                hourlyRate: hourlyRate !== undefined ? hourlyRate : undefined,
+                city: city !== undefined ? city : undefined,
+                state: state !== undefined ? state : undefined,
+                address: address !== undefined ? address : undefined,
+                availability: availability !== undefined ? availability : undefined,
+                languages: languages !== undefined ? languages : undefined,
+                experience: experience !== undefined ? parseInt(experience) : undefined,
+            },
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        phone: true,
+                        email: true,
+                        avatar: true
+                    }
+                }
+            }
+        });
+
+        // 3. Update Specializations (if provided)
+        if (specializations && Array.isArray(specializations)) {
+            // Delete existing
+            await tx.lawyerSpecialization.deleteMany({
+                where: { lawyerId: lawyer.id }
+            });
+
+            // Find practice areas
+            const practiceAreas = await tx.practiceArea.findMany({
+                where: {
+                    OR: [
+                        { name: { in: specializations, mode: 'insensitive' } },
+                        { slug: { in: specializations, mode: 'insensitive' } }
+                    ]
+                }
+            });
+
+            // Create new connections
+            if (practiceAreas.length > 0) {
+                await tx.lawyerSpecialization.createMany({
+                    data: practiceAreas.map((pa, index) => ({
+                        lawyerId: lawyer.id,
+                        practiceAreaId: pa.id,
+                        isPrimary: index === 0 // First one is primary
+                    }))
+                });
+            }
+        }
+
+        return lawyer;
     });
 
     return sendSuccess(res, {
-        data: lawyer,
-        message: 'Profile updated successfully',
+        data: updatedLawyer,
+        message: 'Profile updated successfully'
     });
 }));
 
