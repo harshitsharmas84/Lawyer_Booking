@@ -97,9 +97,9 @@ export default function DashboardNavbar({
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         <LogoHover theme={config.theme} />
-                    </Link>
+                    </div>
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-1">

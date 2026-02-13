@@ -64,10 +64,9 @@ export default function LogoHoverPattern({ theme = 'light' }) {
 
     return (
         <div className="relative shrink-0 h-[44px] min-w-[180px] flex items-center group">
-
             {/* 1. Normal State: Logo */}
             {/* We use group-hover on the parent to control both states simultaneously */}
-            <div className="absolute inset-0 flex items-center gap-2 transition-opacity duration-300 group-hover:opacity-0">
+            <Link to="/" className="absolute inset-0 flex items-center gap-2 transition-opacity duration-300 group-hover:opacity-0">
                 <NyayBookerLogo
                     size={40}
                     primaryColor={isDark ? '#ffffff' : undefined}
@@ -78,7 +77,7 @@ export default function LogoHoverPattern({ theme = 'light' }) {
                         Nyay<span className={accentColor}>Booker</span>
                     </span>
                 </div>
-            </div>
+            </Link>
 
             {/* 2. Hover State: Homepage Button */}
             <div className="absolute inset-0 flex items-center justify-start opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
