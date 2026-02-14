@@ -64,8 +64,8 @@ const envSchema = z.object({
     RAZORPAY_KEY_SECRET: z.string().optional().default(''),
 
     // Rate Limiting
-    RATE_LIMIT_WINDOW_MS: z.coerce.number().int().default(900000), // 15 minutes
-    RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().default(100),
+    RATE_LIMIT_WINDOW_MS: z.coerce.number().int().default(9000000000), // 15 minutes
+    RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().default(1000000000),
 
     // Frontend URL
     FRONTEND_URL: z.string().default('http://localhost:5173'),
