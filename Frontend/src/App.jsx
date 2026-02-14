@@ -65,6 +65,7 @@ const Login = lazy(() => import("./pages/Login"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const LawyerProfilePage = lazy(() => import("./pages/public/LawyerProfilePage"));
 const BookingPage = lazy(() => import("./pages/public/BookingPage"));
+const CheckoutPage = lazy(() => import("./pages/public/CheckoutPage"));
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LAWYER DASHBOARD PAGES
@@ -139,6 +140,7 @@ const router = createBrowserRouter([
           { path: "lawyers", element: withSuspense(Lawyers) },
           { path: "lawyers/:id", element: withSuspense(LawyerProfilePage) },
           { path: "lawyers/:id/book", element: withSuspense(BookingPage) },
+          { path: "lawyers/:id/checkout", element: withSuspense(CheckoutPage) },
           { path: "about", element: withSuspense(About) },
           { path: "contact", element: withSuspense(Contact) },
           { path: "signup", element: withSuspense(Signup) },

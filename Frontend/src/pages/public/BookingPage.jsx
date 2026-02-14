@@ -85,7 +85,7 @@ export default function BookingPage() {
 
         setSubmitting(true);
         try {
-            await appointmentAPI.create({
+            const result = await appointmentAPI.create({
                 lawyerId: id,
                 scheduledDate: booking.date,
                 scheduledTime: booking.time,
@@ -94,7 +94,20 @@ export default function BookingPage() {
                 clientNotes: booking.notes,
                 amount: lawyer.consultationFee || lawyer.hourlyRate || 0,
             });
-            setSuccess(true);
+
+            // Store booking details for checkout page
+            sessionStorage.setItem('pendingBooking', JSON.stringify({
+                date: booking.date,
+                time: booking.time,
+                type: booking.type,
+                meetingType: booking.type === 'video' ? 'VIDEO' : 'IN_PERSON',
+                notes: booking.notes,
+                amount: lawyer.consultationFee || lawyer.hourlyRate || 0,
+                bookingId: result?.data?.id,
+            }));
+
+            // Navigate to checkout page
+            navigate(`/lawyers/${id}/checkout`);
         } catch (error) {
             console.error('Error creating appointment:', error);
             alert(error.response?.data?.message || 'Booking failed. Please try again.');
