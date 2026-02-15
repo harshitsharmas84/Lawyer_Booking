@@ -26,26 +26,26 @@ let transporter = null;
  * @returns {import('nodemailer').Transporter}
  */
 function getTransporter() {
-    if (!transporter) {
-        if (!env.SMTP_HOST || !env.SMTP_USER) {
-            logger.warn('⚠️  Email not configured (SMTP credentials missing)');
-            return null;
-        }
-
-        transporter = nodemailer.createTransport({
-            host: env.SMTP_HOST,
-            port: env.SMTP_PORT,
-            secure: env.SMTP_PORT === 465,
-            auth: {
-                user: env.SMTP_USER,
-                pass: env.SMTP_PASS,
-            },
-        });
-
-        logger.info('✅ Email transporter initialized');
+  if (!transporter) {
+    if (!env.SMTP_HOST || !env.SMTP_USER) {
+      logger.warn('⚠️  Email not configured (SMTP credentials missing)');
+      return null;
     }
 
-    return transporter;
+    transporter = nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    });
+
+    logger.info('✅ Email transporter initialized');
+  }
+
+  return transporter;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -63,37 +63,37 @@ function getTransporter() {
  * @returns {Promise<Object>} Send result
  */
 export async function sendEmail({ to, subject, text, html }) {
-    const emailTransporter = getTransporter();
+  const emailTransporter = getTransporter();
 
-    if (!emailTransporter) {
-        logger.warn('Email not sent (transporter not configured):', { to, subject });
-        return { accepted: [], rejected: [to], messageId: null };
-    }
+  if (!emailTransporter) {
+    logger.warn('Email not sent (transporter not configured):', { to, subject });
+    return { accepted: [], rejected: [to], messageId: null };
+  }
 
-    try {
-        const result = await emailTransporter.sendMail({
-            from: env.EMAIL_FROM,
-            to,
-            subject,
-            text,
-            html,
-        });
+  try {
+    const result = await emailTransporter.sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject,
+      text,
+      html,
+    });
 
-        logger.info('Email sent successfully', {
-            to,
-            subject,
-            messageId: result.messageId,
-        });
+    logger.info('Email sent successfully', {
+      to,
+      subject,
+      messageId: result.messageId,
+    });
 
-        return result;
-    } catch (error) {
-        logger.error('Failed to send email', {
-            to,
-            subject,
-            error: error.message,
-        });
-        throw error;
-    }
+    return result;
+  } catch (error) {
+    logger.error('Failed to send email', {
+      to,
+      subject,
+      error: error.message,
+    });
+    throw error;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -106,7 +106,7 @@ export async function sendEmail({ to, subject, text, html }) {
  * @returns {string} Wrapped HTML
  */
 function wrapEmailTemplate(content) {
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -195,9 +195,9 @@ function wrapEmailTemplate(content) {
  * @returns {Promise<Object>} Send result
  */
 export async function sendVerificationEmail({ to, name, token }) {
-    const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
+  const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
 
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Verify Your Email Address</h2>
     <p>Hi ${name},</p>
     <p>Thank you for registering with NyayBooker. Please verify your email address by clicking the button below:</p>
@@ -210,12 +210,12 @@ export async function sendVerificationEmail({ to, name, token }) {
     <p>If you didn't create an account with us, you can safely ignore this email.</p>
   `);
 
-    return sendEmail({
-        to,
-        subject: 'Verify Your Email - NyayBooker',
-        html,
-        text: `Hi ${name},\n\nPlease verify your email by visiting: ${verificationUrl}\n\nThis link expires in 24 hours.`,
-    });
+  return sendEmail({
+    to,
+    subject: 'Verify Your Email - NyayBooker',
+    html,
+    text: `Hi ${name},\n\nPlease verify your email by visiting: ${verificationUrl}\n\nThis link expires in 24 hours.`,
+  });
 }
 
 /**
@@ -228,9 +228,9 @@ export async function sendVerificationEmail({ to, name, token }) {
  * @returns {Promise<Object>} Send result
  */
 export async function sendPasswordResetEmail({ to, name, token }) {
-    const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}`;
+  const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}`;
 
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Reset Your Password</h2>
     <p>Hi ${name},</p>
     <p>We received a request to reset your password. Click the button below to create a new password:</p>
@@ -243,12 +243,12 @@ export async function sendPasswordResetEmail({ to, name, token }) {
     <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
   `);
 
-    return sendEmail({
-        to,
-        subject: 'Reset Your Password - NyayBooker',
-        html,
-        text: `Hi ${name},\n\nReset your password by visiting: ${resetUrl}\n\nThis link expires in 1 hour.`,
-    });
+  return sendEmail({
+    to,
+    subject: 'Reset Your Password - NyayBooker',
+    html,
+    text: `Hi ${name},\n\nReset your password by visiting: ${resetUrl}\n\nThis link expires in 1 hour.`,
+  });
 }
 
 /**
@@ -262,9 +262,9 @@ export async function sendPasswordResetEmail({ to, name, token }) {
  * @returns {Promise<Object>} Send result
  */
 export async function sendBookingConfirmationEmail({ to, name, booking, lawyer }) {
-    const bookingUrl = `${env.FRONTEND_URL}/bookings/${booking.id}`;
+  const bookingUrl = `${env.FRONTEND_URL}/bookings/${booking.id}`;
 
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Booking Confirmed!</h2>
     <p>Hi ${name},</p>
     <p>Your consultation has been confirmed. Here are the details:</p>
@@ -294,12 +294,12 @@ export async function sendBookingConfirmationEmail({ to, name, booking, lawyer }
     <p>Need to reschedule? <a href="${bookingUrl}">Click here</a> to manage your booking.</p>
   `);
 
-    return sendEmail({
-        to,
-        subject: `Booking Confirmed - ${booking.bookingNumber} | NyayBooker`,
-        html,
-        text: `Hi ${name},\n\nYour booking (${booking.bookingNumber}) with ${lawyer.name} on ${booking.date} at ${booking.time} has been confirmed.\n\nView details: ${bookingUrl}`,
-    });
+  return sendEmail({
+    to,
+    subject: `Booking Confirmed - ${booking.bookingNumber} | NyayBooker`,
+    html,
+    text: `Hi ${name},\n\nYour booking (${booking.bookingNumber}) with ${lawyer.name} on ${booking.date} at ${booking.time} has been confirmed.\n\nView details: ${bookingUrl}`,
+  });
 }
 
 /**
@@ -313,7 +313,7 @@ export async function sendBookingConfirmationEmail({ to, name, booking, lawyer }
  * @returns {Promise<Object>} Send result
  */
 export async function sendBookingCancellationEmail({ to, name, booking, reason }) {
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Booking Cancelled</h2>
     <p>Hi ${name},</p>
     <p>Your booking has been cancelled. Here are the details:</p>
@@ -332,12 +332,12 @@ export async function sendBookingCancellationEmail({ to, name, booking, reason }
     </p>
   `);
 
-    return sendEmail({
-        to,
-        subject: `Booking Cancelled - ${booking.bookingNumber} | NyayBooker`,
-        html,
-        text: `Hi ${name},\n\nYour booking (${booking.bookingNumber}) scheduled for ${booking.date} at ${booking.time} has been cancelled.\n\n${reason ? `Reason: ${reason}` : ''}`,
-    });
+  return sendEmail({
+    to,
+    subject: `Booking Cancelled - ${booking.bookingNumber} | NyayBooker`,
+    html,
+    text: `Hi ${name},\n\nYour booking (${booking.bookingNumber}) scheduled for ${booking.date} at ${booking.time} has been cancelled.\n\n${reason ? `Reason: ${reason}` : ''}`,
+  });
 }
 
 /**
@@ -351,9 +351,9 @@ export async function sendBookingCancellationEmail({ to, name, booking, reason }
  * @returns {Promise<Object>} Send result
  */
 export async function sendBookingReminderEmail({ to, name, booking, lawyer }) {
-    const bookingUrl = `${env.FRONTEND_URL}/bookings/${booking.id}`;
+  const bookingUrl = `${env.FRONTEND_URL}/bookings/${booking.id}`;
 
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Upcoming Consultation Reminder</h2>
     <p>Hi ${name},</p>
     <p>This is a reminder for your upcoming consultation:</p>
@@ -373,12 +373,12 @@ export async function sendBookingReminderEmail({ to, name, booking, lawyer }) {
     <p>Please be ready 5 minutes before the scheduled time.</p>
   `);
 
-    return sendEmail({
-        to,
-        subject: `Reminder: Consultation Tomorrow | NyayBooker`,
-        html,
-        text: `Hi ${name},\n\nReminder: You have a consultation with ${lawyer.name} on ${booking.date} at ${booking.time}.\n\nView details: ${bookingUrl}`,
-    });
+  return sendEmail({
+    to,
+    subject: `Reminder: Consultation Tomorrow | NyayBooker`,
+    html,
+    text: `Hi ${name},\n\nReminder: You have a consultation with ${lawyer.name} on ${booking.date} at ${booking.time}.\n\nView details: ${bookingUrl}`,
+  });
 }
 
 /**
@@ -391,12 +391,12 @@ export async function sendBookingReminderEmail({ to, name, booking, lawyer }) {
  * @returns {Promise<Object>} Send result
  */
 export async function sendWelcomeEmail({ to, name, role }) {
-    const isLawyer = role === 'LAWYER';
-    const dashboardUrl = isLawyer
-        ? `${env.FRONTEND_URL}/lawyer/dashboard`
-        : `${env.FRONTEND_URL}/dashboard`;
+  const isLawyer = role === 'LAWYER';
+  const dashboardUrl = isLawyer
+    ? `${env.FRONTEND_URL}/lawyer/dashboard`
+    : `${env.FRONTEND_URL}/dashboard`;
 
-    const html = wrapEmailTemplate(`
+  const html = wrapEmailTemplate(`
     <h2>Welcome to NyayBooker!</h2>
     <p>Hi ${name},</p>
     <p>Welcome to NyayBooker! We're excited to have you on board.</p>
@@ -428,20 +428,125 @@ export async function sendWelcomeEmail({ to, name, role }) {
     <p>Need help? Contact our support team anytime.</p>
   `);
 
-    return sendEmail({
-        to,
-        subject: 'Welcome to NyayBooker!',
-        html,
-        text: `Hi ${name},\n\nWelcome to NyayBooker! Visit your dashboard to get started: ${dashboardUrl}`,
-    });
+  return sendEmail({
+    to,
+    subject: 'Welcome to NyayBooker!',
+    html,
+    text: `Hi ${name},\n\nWelcome to NyayBooker! Visit your dashboard to get started: ${dashboardUrl}`,
+  });
+}
+
+/**
+ * Send payment confirmation email to CLIENT (receipt)
+ * 
+ * @param {Object} options
+ * @param {string} options.to - Client email
+ * @param {string} options.name - Client name
+ * @param {Object} options.payment - Payment details
+ * @param {Object} options.booking - Booking details
+ * @param {Object} options.lawyer - Lawyer info { name }
+ * @returns {Promise<Object>} Send result
+ */
+export async function sendPaymentConfirmationEmail({ to, name, payment, booking, lawyer }) {
+  const amount = Number(payment.amount).toLocaleString('en-IN');
+  const date = new Date(booking.scheduledDate).toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  const txnId = payment.gatewayPaymentId || payment.id;
+
+  const html = wrapEmailTemplate(`
+    <h2>Payment Successful!</h2>
+    <p>Hi ${name},</p>
+    <p>Your payment has been processed successfully. Here's your receipt:</p>
+    
+    <div class="info-box" style="border-left: 4px solid #22c55e;">
+      <p><strong>Transaction ID:</strong> ${txnId}</p>
+      <p><strong>Amount Paid:</strong> ₹${amount}</p>
+      <p><strong>Payment Method:</strong> ${payment.method || 'Card'}</p>
+      <p><strong>Date:</strong> ${new Date(payment.processedAt || payment.createdAt).toLocaleString('en-IN')}</p>
+    </div>
+    
+    <div class="info-box">
+      <p style="font-weight: 600; margin-bottom: 8px;">Booking Details</p>
+      <p><strong>Booking #:</strong> ${booking.bookingNumber}</p>
+      <p><strong>Advocate:</strong> ${lawyer.name}</p>
+      <p><strong>Consultation Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${booking.scheduledTime}</p>
+      <p><strong>Duration:</strong> ${booking.duration || 60} minutes</p>
+      <p><strong>Type:</strong> ${booking.meetingType || 'Video'}</p>
+    </div>
+    
+    <p style="text-align: center;">
+      <a href="${env.FRONTEND_URL}/user/payments" class="button">View Payment History</a>
+    </p>
+    
+    <p style="color: #666; font-size: 13px;">If you have any questions about this payment, please contact our support team.</p>
+  `);
+
+  return sendEmail({
+    to,
+    subject: `Payment Receipt - ₹${amount} | NyayBooker`,
+    html,
+    text: `Hi ${name},\n\nYour payment of ₹${amount} to ${lawyer.name} has been processed.\nTransaction ID: ${txnId}\nBooking #: ${booking.bookingNumber}\n\nView details: ${env.FRONTEND_URL}/user/payments`,
+  });
+}
+
+/**
+ * Send payment received email to LAWYER (notification)
+ * 
+ * @param {Object} options
+ * @param {string} options.to - Lawyer email
+ * @param {string} options.name - Lawyer name
+ * @param {Object} options.payment - Payment details
+ * @param {Object} options.booking - Booking details
+ * @param {Object} options.client - Client info { name }
+ * @returns {Promise<Object>} Send result
+ */
+export async function sendPaymentReceivedEmail({ to, name, payment, booking, client }) {
+  const amount = Number(payment.amount).toLocaleString('en-IN');
+  const date = new Date(booking.scheduledDate).toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const html = wrapEmailTemplate(`
+    <h2>New Payment Received!</h2>
+    <p>Hi ${name},</p>
+    <p>Great news! You've received a new payment for a consultation booking.</p>
+    
+    <div class="info-box" style="border-left: 4px solid #2563eb;">
+      <p style="font-size: 24px; font-weight: 700; color: #22c55e; margin: 0;">₹${amount}</p>
+      <p style="color: #666; margin-top: 4px;">Payment from ${client.name}</p>
+    </div>
+    
+    <div class="info-box">
+      <p><strong>Booking #:</strong> ${booking.bookingNumber}</p>
+      <p><strong>Client:</strong> ${client.name}</p>
+      <p><strong>Consultation Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${booking.scheduledTime}</p>
+      <p><strong>Duration:</strong> ${booking.duration || 60} minutes</p>
+    </div>
+    
+    <p style="text-align: center;">
+      <a href="${env.FRONTEND_URL}/lawyer/earnings" class="button">View Earnings</a>
+    </p>
+  `);
+
+  return sendEmail({
+    to,
+    subject: `Payment Received - ₹${amount} from ${client.name} | NyayBooker`,
+    html,
+    text: `Hi ${name},\n\nYou received ₹${amount} from ${client.name}.\nBooking #: ${booking.bookingNumber}\nDate: ${date} at ${booking.scheduledTime}\n\nView earnings: ${env.FRONTEND_URL}/lawyer/earnings`,
+  });
 }
 
 export default {
-    sendEmail,
-    sendVerificationEmail,
-    sendPasswordResetEmail,
-    sendBookingConfirmationEmail,
-    sendBookingCancellationEmail,
-    sendBookingReminderEmail,
-    sendWelcomeEmail,
+  sendEmail,
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendBookingConfirmationEmail,
+  sendBookingCancellationEmail,
+  sendBookingReminderEmail,
+  sendWelcomeEmail,
+  sendPaymentConfirmationEmail,
+  sendPaymentReceivedEmail,
 };

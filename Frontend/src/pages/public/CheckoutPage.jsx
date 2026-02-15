@@ -1,6 +1,6 @@
 /**
- * Checkout Page — Dummy Payment Form
- * Shows booking summary + payment form → success page
+ * Checkout Page — Real Payment via Backend
+ * Shows booking summary + payment form → creates booking+payment → success
  */
 
 import { useState, useEffect } from 'react';
@@ -9,7 +9,7 @@ import {
     CreditCard, Lock, ShieldCheck, CheckCircle, ArrowLeft,
     Calendar, Clock, Video, MapPin, User, Loader2
 } from 'lucide-react';
-import { lawyerAPI } from '../../services/api';
+import { lawyerAPI, paymentAPI } from '../../services/api';
 
 // ─── Card formatting helpers ────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ function formatExpiry(value) {
 
 // ─── Success Screen ─────────────────────────────────────────────────────────
 
-function PaymentSuccess({ lawyer, booking }) {
+function PaymentSuccess({ lawyer, booking, paymentResult }) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center animate-fade-in">
@@ -50,21 +50,35 @@ function PaymentSuccess({ lawyer, booking }) {
                             className="w-12 h-12 rounded-lg object-cover"
                         />
                         <div>
-                            <p className="font-semibold text-gray-900">{lawyer?.name}</p>
+                            <p className="font-semibold text-gray-900">{paymentResult?.lawyerName || lawyer?.name}</p>
                             <p className="text-sm text-gray-500">{lawyer?.specialty?.[0] || 'Legal Consultation'}</p>
                         </div>
                     </div>
 
+                    {/* Real booking details */}
+                    {paymentResult?.booking && (
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Booking Confirmation</p>
+                            <p className="text-sm font-semibold text-gray-800">#{paymentResult.booking.bookingNumber}</p>
+                        </div>
+                    )}
+                    {paymentResult?.payment && (
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                            <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Transaction ID</p>
+                            <p className="text-sm font-mono text-gray-800">{paymentResult.payment.transactionId}</p>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
                             <Calendar className="w-4 h-4 text-blue-500" />
-                            {booking.date
-                                ? new Date(booking.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+                            {(paymentResult?.booking?.scheduledDate || booking.date)
+                                ? new Date(paymentResult?.booking?.scheduledDate || booking.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
                                 : 'N/A'}
                         </div>
                         <div className="flex items-center gap-2 text-gray-600">
                             <Clock className="w-4 h-4 text-blue-500" />
-                            {booking.time || 'N/A'}
+                            {paymentResult?.booking?.scheduledTime || booking.time || 'N/A'}
                         </div>
                         <div className="flex items-center gap-2 text-gray-600">
                             {booking.type === 'video' || booking.meetingType === 'VIDEO'
@@ -73,7 +87,7 @@ function PaymentSuccess({ lawyer, booking }) {
                         </div>
                         <div className="flex items-center gap-2 text-gray-600">
                             <CreditCard className="w-4 h-4 text-blue-500" />
-                            ₹{Number(booking.amount || 0).toLocaleString('en-IN')}
+                            ₹{Number(paymentResult?.payment?.amount || booking.amount || 0).toLocaleString('en-IN')}
                         </div>
                     </div>
                 </div>
@@ -108,6 +122,8 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [paymentResult, setPaymentResult] = useState(null);
+    const [apiError, setApiError] = useState('');
     const [errors, setErrors] = useState({});
 
     // Read booking info from sessionStorage (set by BookingPage)
@@ -151,18 +167,37 @@ export default function CheckoutPage() {
         return Object.keys(e).length === 0;
     }
 
-    // ── Submit (dummy) ──────────────────────────────────────────────────────
+    // ── Submit (real API call) ───────────────────────────────────────────────
 
     async function handlePay(e) {
         e.preventDefault();
         if (!validate()) return;
 
         setProcessing(true);
-        // Simulate payment processing delay
-        await new Promise(r => setTimeout(r, 2000));
-        sessionStorage.removeItem('pendingBooking');
-        setProcessing(false);
-        setSuccess(true);
+        setApiError('');
+
+        try {
+            const response = await paymentAPI.checkout({
+                lawyerId: id,
+                scheduledDate: booking.date,
+                scheduledTime: booking.time,
+                duration: booking.duration || 60,
+                meetingType: booking.type?.toUpperCase() || booking.meetingType || 'VIDEO',
+                amount: parseFloat(amount),
+                clientNotes: booking.notes || '',
+                paymentMethod: 'CARD',
+            });
+
+            sessionStorage.removeItem('pendingBooking');
+            setPaymentResult(response.data);
+            setSuccess(true);
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.message || 'Payment failed. Please try again.';
+            setApiError(msg);
+            console.error('Checkout error:', err);
+        } finally {
+            setProcessing(false);
+        }
     }
 
     // ── Derived values ──────────────────────────────────────────────────────
@@ -185,7 +220,7 @@ export default function CheckoutPage() {
     // ── Success state ───────────────────────────────────────────────────────
 
     if (success) {
-        return <PaymentSuccess lawyer={lawyer} booking={{ ...booking, amount }} />;
+        return <PaymentSuccess lawyer={lawyer} booking={{ ...booking, amount }} paymentResult={paymentResult} />;
     }
 
     // ── Main render ─────────────────────────────────────────────────────────
@@ -254,6 +289,14 @@ export default function CheckoutPage() {
 
                         {/* Payment Form */}
                         <form onSubmit={handlePay} className="space-y-5">
+                            {/* API Error Banner */}
+                            {apiError && (
+                                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 flex items-start gap-2">
+                                    <span className="text-red-500 mt-0.5 shrink-0">⚠</span>
+                                    <span>{apiError}</span>
+                                </div>
+                            )}
+
                             {/* Cardholder Name */}
                             <div>
                                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">

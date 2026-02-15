@@ -637,11 +637,53 @@ router.put('/profile', authenticate, requireVerifiedLawyer, asyncHandler(async (
 }));
 
 /**
+ * @route   PUT /api/v1/lawyers/me/payment-credentials
+ * @desc    Update lawyer payment acceptance credentials (bank/UPI)
+ * @access  Private/Lawyer
+ */
+router.put('/me/payment-credentials', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
+    const prisma = getPrismaClient();
+    const { bankAccountName, bankAccountNumber, bankIfscCode, upiId } = req.body;
+
+    // At least one credential must be provided
+    if (!bankAccountName && !bankAccountNumber && !bankIfscCode && !upiId) {
+        return res.status(400).json({
+            success: false,
+            message: 'At least one payment credential field is required',
+        });
+    }
+
+    const updateData = {};
+    if (bankAccountName !== undefined) updateData.bankAccountName = bankAccountName;
+    if (bankAccountNumber !== undefined) updateData.bankAccountNumber = bankAccountNumber;
+    if (bankIfscCode !== undefined) updateData.bankIfscCode = bankIfscCode ? bankIfscCode.toUpperCase() : null;
+    if (upiId !== undefined) updateData.upiId = upiId;
+
+    const lawyer = await prisma.lawyer.update({
+        where: { userId: req.user.id },
+        data: updateData,
+        select: {
+            id: true,
+            bankAccountName: true,
+            bankAccountNumber: true,
+            bankIfscCode: true,
+            upiId: true,
+        },
+    });
+
+    return sendSuccess(res, {
+        data: lawyer,
+        message: 'Payment credentials updated successfully',
+    });
+}));
+
+/**
  * @route   PUT /api/v1/lawyers/availability
  * @desc    Update lawyer availability status
  * @access  Private/Lawyer
  */
 router.put('/availability', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
+
     const prisma = getPrismaClient();
     const { isAvailable } = req.body;
 

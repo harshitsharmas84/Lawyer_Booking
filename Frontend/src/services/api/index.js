@@ -106,6 +106,25 @@ export const lawyerAPI = {
         return response.data;
     },
 
+    async updatePaymentCredentials(data) {
+        const response = await apiClient.put('/lawyers/me/payment-credentials', data);
+        return response.data;
+    },
+
+    async getPaymentCredentials() {
+        // Payment credentials come from the lawyer profile
+        const response = await apiClient.get('/lawyers/profile');
+        const lawyer = response.data?.data;
+        return {
+            data: {
+                bankAccountName: lawyer?.bankAccountName || '',
+                bankAccountNumber: lawyer?.bankAccountNumber || '',
+                bankIfscCode: lawyer?.bankIfscCode || '',
+                upiId: lawyer?.upiId || '',
+            },
+        };
+    },
+
     async getFeatured(limit = 6) {
         const response = await apiClient.get('/lawyers/featured', { params: { limit } });
         return response.data?.data || response.data || [];
@@ -234,8 +253,19 @@ export const paymentAPI = {
         const params = {};
         if (filters.status) params.status = filters.status;
         if (filters.page) params.page = filters.page;
+        if (filters.limit) params.limit = filters.limit;
 
         const response = await apiClient.get('/payments', { params });
+        return response.data;
+    },
+
+    async getById(id) {
+        const response = await apiClient.get(`/payments/${id}`);
+        return response.data;
+    },
+
+    async checkout(data) {
+        const response = await apiClient.post('/payments/checkout', data);
         return response.data;
     },
 
@@ -245,7 +275,7 @@ export const paymentAPI = {
     },
 
     async getEarningsSummary() {
-        const response = await apiClient.get('/analytics/hybrid-dashboard');
+        const response = await apiClient.get('/payments/earnings-summary');
         return response.data;
     },
 };

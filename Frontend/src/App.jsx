@@ -78,7 +78,6 @@ const LawyerCalendar = lazy(() => import("./pages/lawyer/LawyerCalendar"));
 const LawyerClients = lazy(() => import("./pages/lawyer/LawyerClients"));
 const LawyerCases = lazy(() => import("./pages/lawyer/LawyerCases"));
 const LawyerEarnings = lazy(() => import("./pages/lawyer/LawyerEarnings"));
-const LawyerAnalytics = lazy(() => import("./pages/lawyer/LawyerAnalytics"));
 const LawyerDocuments = lazy(() => import("./pages/lawyer/LawyerDocuments"));
 const LawyerAvailability = lazy(() => import("./pages/lawyer/LawyerAvailability"));
 
@@ -174,7 +173,7 @@ const router = createBrowserRouter([
           { path: "clients", element: withSuspense(LawyerClients) },
           { path: "cases", element: withSuspense(LawyerCases) },
           { path: "earnings", element: withSuspense(LawyerEarnings) },
-          { path: "analytics", element: withSuspense(LawyerAnalytics) },
+
           { path: "documents", element: withSuspense(LawyerDocuments) },
           { path: "availability", element: withSuspense(LawyerAvailability) },
           { path: "chat", element: withSuspense(ChatPage) },

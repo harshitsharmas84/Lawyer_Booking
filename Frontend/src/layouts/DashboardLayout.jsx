@@ -15,7 +15,7 @@ import {
     // Shared icons
     LayoutDashboard, LogOut, Menu, X, ChevronRight, Bell,
     // Lawyer icons
-    User, Calendar, Users, Briefcase, DollarSign, BarChart3,
+    User, Calendar, Users, Briefcase, DollarSign,
     FileText, Clock, Settings,
     // User icons
     Heart, CreditCard,
@@ -47,7 +47,6 @@ const ROLE_CONFIG = {
             { path: '/lawyer/clients', icon: Users, label: 'Clients' },
             { path: '/lawyer/cases', icon: Briefcase, label: 'Cases' },
             { path: '/lawyer/earnings', icon: DollarSign, label: 'Earnings' },
-            { path: '/lawyer/analytics', icon: BarChart3, label: 'Analytics' },
             { path: '/lawyer/documents', icon: FileText, label: 'Documents' },
             { path: '/lawyer/availability', icon: Settings, label: 'Availability' },
         ],

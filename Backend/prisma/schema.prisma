@@ -218,6 +218,12 @@ model Lawyer {
   featured            Boolean             @default(false)
   featuredOrder       Int?                @map("featured_order")
   
+  // Payment Credentials
+  bankAccountName     String?             @map("bank_account_name")
+  bankAccountNumber   String?             @map("bank_account_number")
+  bankIfscCode        String?             @map("bank_ifsc_code")
+  upiId               String?             @map("upi_id")
+  
   // Timestamps
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
