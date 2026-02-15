@@ -145,8 +145,23 @@ export default function CheckoutPage() {
         if (!form.name.trim()) e.name = 'Cardholder name is required';
         const digits = form.cardNumber.replace(/\s/g, '');
         if (digits.length < 16) e.cardNumber = 'Enter a valid 16-digit card number';
-        if (form.expiry.length < 5) e.expiry = 'Enter a valid expiry (MM/YY)';
-        if (form.cvc.length < 3) e.cvc = 'Enter a valid CVC';
+
+        // Expiry Validation
+        if (!form.expiry || form.expiry.length < 5) {
+            e.expiry = 'Enter valid expiry (MM/YY)';
+        } else {
+            const [month, year] = form.expiry.split('/');
+            const monthNum = parseInt(month, 10);
+            if (!monthNum || monthNum < 1 || monthNum > 12) {
+                e.expiry = 'Invalid month (01-12)';
+            }
+        }
+
+        // CVC Validation
+        if (!form.cvc || form.cvc.length !== 3) {
+            e.cvc = 'CVC must be 3 digits';
+        }
+
         setErrors(e);
         return Object.keys(e).length === 0;
     }
@@ -322,8 +337,8 @@ export default function CheckoutPage() {
                                         type="password"
                                         placeholder="•••"
                                         value={form.cvc}
-                                        onChange={e => setForm({ ...form, cvc: e.target.value.replace(/\D/g, '').slice(0, 4) })}
-                                        maxLength={4}
+                                        onChange={e => setForm({ ...form, cvc: e.target.value.replace(/\D/g, '').slice(0, 3) })}
+                                        maxLength={3}
                                         className={`w-full px-4 py-3 rounded-xl border bg-white outline-none transition-all
                       ${errors.cvc ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} focus:ring-4`}
                                     />

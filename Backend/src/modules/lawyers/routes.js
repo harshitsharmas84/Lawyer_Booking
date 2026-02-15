@@ -27,6 +27,7 @@ router.get('/', searchLimiter, optionalAuth, asyncHandler(async (req, res) => {
     const prisma = getPrismaClient();
     const { page, limit, skip } = parsePaginationParams(req.query);
 
+
     // Filters
     const {
         specialization,

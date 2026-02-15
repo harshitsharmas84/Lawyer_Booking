@@ -381,16 +381,16 @@ const Signup = () => {
             </div>
           </div>
 
-           {/* Google Login */}
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  size="large"
-                  text="signin_with"
-                />
-              </div>
+          {/* Google Login */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              text="signin_with"
+            />
+          </div>
 
           <p className="text-center text-gray-600 mt-4 text-sm">
             Already have an account?{" "}

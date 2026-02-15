@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles, AlertCircle, Scale, ShieldCheck } from 'lucide-react';
-import { LOGIN_ROLES } from '../constants/roles';
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -11,14 +10,11 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect');
 
-  const [state, setState] = useState("User");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  const roles = LOGIN_ROLES;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,24 +22,19 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      // Use email as-is for User/Lawyer, or "admin" for Admin role
-      const loginEmail = state === "Admin" ? (email || "admin") : email;
-
-      const result = await login(loginEmail, password);
+      const result = await login(email, password);
 
       if (result.success) {
-        // Check for redirect param first
         if (redirectTo) {
           navigate(redirectTo);
         } else {
-          // Navigate based on role
           const userRole = result.user.role;
           if (userRole === "ADMIN") {
             navigate("/admin");
           } else if (userRole === "LAWYER") {
             navigate("/lawyer");
           } else {
-            navigate("/user");
+            navigate("/");
           }
         }
       } else {
@@ -71,7 +62,7 @@ const Login = () => {
           if (userRole === "LAWYER") {
             navigate("/lawyer");
           } else {
-            navigate("/user");
+            navigate("/");
           }
         }
       } else {
@@ -104,8 +95,8 @@ const Login = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg shadow-blue-500/30">
               <Scale className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-500 mt-2">Sign in to continue to Nyay Booker</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome</h1>
+            <p className="text-gray-500 mt-2">Sign in Nyay Booker</p>
           </div>
 
           {/* Error Message */}
@@ -116,52 +107,19 @@ const Login = () => {
             </div>
           )}
 
-          {/* Role Selector */}
-          <div className="mb-6">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Login as</p>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map((role) => {
-                const Icon = role.icon;
-                return (
-                  <button
-                    key={role.id}
-                    type="button"
-                    onClick={() => setState(role.id)} aria-pressed={state === role.id}
-                    className={`relative p-3 rounded-xl border-2 transition-all duration-200 ${state === role.id
-                      ? "border-blue-500 bg-blue-50 shadow-md"
-                      : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100"
-                      }`}
-                  >
-                    <Icon className={`w-5 h-5 mx-auto mb-1 ${state === role.id ? "text-blue-600" : "text-gray-500"
-                      }`} />
-                    <p className={`text-xs font-semibold ${state === role.id ? "text-blue-700" : "text-gray-700"
-                      }`}>{role.label}</p>
-                    <p className={`text-[10px] ${state === role.id ? "text-blue-500" : "text-gray-400"
-                      }`}>{role.desc}</p>
-                    {state === role.id && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                        <Sparkles className="w-2.5 h-2.5 text-white" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                {state === "Admin" ? "Username or Email" : "Email Address"}
+                Enter your Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  id="email" type={state === "Admin" ? "text" : "email"}
+                  id="email" type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={state === "Admin" ? "admin" : "you@example.com"}
+                  placeholder="Enter your email"
                   className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all text-gray-900 placeholder:text-gray-400"
                   required
                 />
@@ -219,30 +177,26 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Divider - Only show for non-admin */}
-          {state !== "Admin" && (
-            <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">or continue with</span>
-                </div>
-              </div>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">or continue with</span>
+            </div>
+          </div>
 
-              {/* Google Login */}
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  size="large"
-                  text="signin_with"
-                />
-              </div>
-            </>
-          )}
+          {/* Google Login */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              text="signin_with"
+            />
+          </div>
 
           {/* Sign Up Link */}
           <p className="text-center text-gray-600 mt-6">

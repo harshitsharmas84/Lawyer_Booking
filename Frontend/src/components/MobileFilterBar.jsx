@@ -140,15 +140,15 @@ export function MobileFilterBar({ filters, setFilters, totalResults, onClear }) 
                                 </button>
                                 {expandedSections.specialty && (
                                     <div className="space-y-2 mt-3 pl-1">
-                                        {specialties.map(specialty => (
-                                            <label key={specialty} className="flex items-center gap-3 py-1.5 cursor-pointer">
+                                        {specialties.map(item => (
+                                            <label key={item.value} className="flex items-center gap-3 py-1.5 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={filters.specialties.includes(specialty)}
-                                                    onChange={() => handleCheckboxChange('specialties', specialty)}
+                                                    checked={filters.specialties.includes(item.value)}
+                                                    onChange={() => handleCheckboxChange('specialties', item.value)}
                                                     className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
                                                 />
-                                                <span className="text-sm text-gray-700">{specialty}</span>
+                                                <span className="text-sm text-gray-700">{item.label}</span>
                                             </label>
                                         ))}
                                     </div>

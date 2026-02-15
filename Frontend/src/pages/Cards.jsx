@@ -214,22 +214,24 @@ const TopLawyers = () => {
         setLoading(true);
         setError(null);
 
-        const response = await lawyerAPI.getFeatured();
-        const data = response?.data || response;
+        // Fetch all verified lawyers instead of just featured ones
+        // Limit to 4 to show a good mix
+        const response = await lawyerAPI.getAll({ limit: 4 });
+        const data = response.data; // getAll returns { data: [...], total: ... }
 
         if (isMounted) {
           if (Array.isArray(data) && data.length > 0) {
             setLawyers(data);
           } else {
-            // No featured lawyers in DB yet — use fallback
+            // No lawyers in DB yet — use fallback
             setLawyers(FALLBACK_LAWYERS);
           }
         }
       } catch (err) {
-        console.warn('Failed to fetch featured lawyers, using fallback:', err.message);
+        console.warn('Failed to fetch lawyers, using fallback:', err.message);
         if (isMounted) {
           setLawyers(FALLBACK_LAWYERS);
-          setError(null); // Don't show error, fallback is seamless
+          setError(null);
         }
       } finally {
         if (isMounted) setLoading(false);
