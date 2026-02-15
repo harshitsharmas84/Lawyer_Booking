@@ -9,6 +9,8 @@ import apiClient from '../apiClient';
 export const lawyerAPI = {
     async getAll(filters = {}) {
         const params = {};
+        if (filters.limit) params.limit = filters.limit;
+        if (filters.page) params.page = filters.page;
         if (filters.search) params.search = filters.search;
         if (filters.locations && filters.locations.length) params.city = filters.locations[0]; // Simple filter for now
         if (filters.specialties && filters.specialties.length) params.specialization = filters.specialties[0];

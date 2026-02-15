@@ -1,34 +1,11 @@
 import { useState } from 'react';
 import { Search, MapPin, Briefcase, Trophy, DollarSign, Clock, BookOpen, X, ChevronDown, Filter } from 'lucide-react';
 import { DualRangeSlider } from './DualRangeSlider';
-
-const locations = [
-  'Bilaspur, HP',
-  'Shimla, HP',
-  'Mandi, HP',
-  'Kangra, HP',
-  'Dharamshala, HP',
-  'Kullu, HP',
-  'Solan, HP',
-  'Hamirpur, HP'
-];
-
-const specialties = [
-  'Criminal Lawyer',
-  'Family Lawyer',
-  'Corporate Lawyer',
-  'Property Lawyer',
-  'Cyber Lawyer',
-  'Civil Lawyer',
-  'Immigration Law',
-  'Human Rights',
-  'Real Estate Law',
-  'Tax Law'
-];
-
-const availabilityOptions = ['Available', 'Limited', 'Busy'];
+import { locations, specialties, availabilityOptions } from '../constants/filters';
 
 export function FilterSidebar({ filters, setFilters, totalResults }) {
+  // ... existing code ...
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     location: true,
@@ -254,15 +231,15 @@ export function FilterSidebar({ filters, setFilters, totalResults }) {
         </button>
         {expandedSections.specialty && (
           <div className="space-y-2 max-h-48 overflow-y-auto mt-3">
-            {specialties.map(specialty => (
-              <label key={specialty} className="flex items-center gap-2 cursor-pointer">
+            {specialties.map(item => (
+              <label key={item.value} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={filters.specialties.includes(specialty)}
-                  onChange={() => handleCheckboxChange('specialties', specialty)}
+                  checked={filters.specialties.includes(item.value)}
+                  onChange={() => handleCheckboxChange('specialties', item.value)}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">{specialty}</span>
+                <span className="text-sm text-gray-700">{item.label}</span>
               </label>
             ))}
           </div>
