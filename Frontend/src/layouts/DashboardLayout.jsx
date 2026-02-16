@@ -370,6 +370,10 @@ export default function DashboardLayout({ role = 'user' }) {
                                     navigate(role === 'lawyer' ? '/lawyer/notifications' : '/user/notifications');
                                     setIsNotificationOpen(false);
                                 }}
+                                onViewAll={() => {
+                                    navigate(role === 'lawyer' ? '/lawyer/notifications' : '/user/notifications');
+                                    setIsNotificationOpen(false);
+                                }}
                             />
                         </div>
 

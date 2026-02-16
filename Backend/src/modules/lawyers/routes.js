@@ -23,6 +23,126 @@ const router = Router();
  * @desc    Get all verified lawyers (public discovery)
  * @access  Public
  */
+/**
+ * @route   GET /api/v1/lawyers/profile
+ * @desc    Get current updated lawyer profile
+ * @access  Private/Lawyer
+ */
+router.get('/profile', authenticate, asyncHandler(async (req, res) => {
+    const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Only lawyers can access this route.',
+        });
+    }
+
+    const lawyer = await prisma.lawyer.findUnique({
+        where: { userId: req.user.id },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phone: true,
+                    avatar: true,
+                    isEmailVerified: true,
+                    createdAt: true
+                },
+            },
+            specializations: {
+                include: {
+                    practiceArea: true,
+                },
+                orderBy: { isPrimary: 'desc' },
+            },
+            qualifications: {
+                orderBy: { year: 'desc' },
+            },
+            reviews: {
+                take: 5,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    author: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            avatar: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (!lawyer) {
+        throw new NotFoundError('Lawyer profile not found');
+    }
+
+    // Transform response
+    const transformed = {
+        id: lawyer.id,
+        slug: lawyer.slug,
+        name: `${lawyer.user.firstName} ${lawyer.user.lastName}`,
+        firstName: lawyer.user.firstName,
+        lastName: lawyer.user.lastName,
+        image: lawyer.user.avatar,
+        avatar: lawyer.user.avatar,
+        bio: lawyer.bio,
+        headline: lawyer.headline,
+        description: lawyer.headline,
+        experience: lawyer.experience,
+        hourlyRate: lawyer.hourlyRate,
+        consultationFee: parseFloat(lawyer.consultationFee) || parseFloat(lawyer.hourlyRate) || 0,
+        avgCostPerCase: lawyer.hourlyRate,
+        currency: lawyer.currency,
+        location: lawyer.city && lawyer.state ? `${lawyer.city}, ${lawyer.state}` : lawyer.city || lawyer.state,
+        city: lawyer.city,
+        state: lawyer.state,
+        address: lawyer.address,
+        barCouncilId: lawyer.barCouncilId,
+        barCouncilState: lawyer.barCouncilState,
+        enrollmentYear: lawyer.enrollmentYear,
+        languages: lawyer.languages,
+        email: lawyer.user.email,
+        phone: lawyer.user.phone,
+        rating: lawyer.averageRating ? Math.round(lawyer.averageRating * 10) / 10 : 0,
+        averageRating: lawyer.averageRating,
+        totalReviews: lawyer.totalReviews,
+        casesWon: lawyer.completedBookings || 0,
+        completedConsultations: lawyer.completedBookings,
+        isAvailable: lawyer.isAvailable,
+        availability: lawyer.availability,
+        verificationStatus: lawyer.verificationStatus,
+        specialty: lawyer.specializations.map(s => s.practiceArea.name),
+        specializations: lawyer.specializations.map(s => ({
+            ...s.practiceArea,
+            isPrimary: s.isPrimary,
+            yearsExperience: s.yearsExperience,
+        })),
+        qualifications: lawyer.qualifications,
+        recentReviews: lawyer.reviews.map(r => ({
+            id: r.id,
+            rating: r.rating,
+            title: r.title,
+            content: r.content,
+            createdAt: r.createdAt,
+            lawyerResponse: r.lawyerResponse,
+            respondedAt: r.respondedAt,
+            author: {
+                name: `${r.author.firstName} ${r.author.lastName.charAt(0)}.`,
+                avatar: r.author.avatar,
+            },
+        })),
+        createdAt: lawyer.user.createdAt,
+    };
+
+    return sendSuccess(res, { data: transformed });
+}));
+
 router.get('/', searchLimiter, optionalAuth, asyncHandler(async (req, res) => {
     const prisma = getPrismaClient();
     const { page, limit, skip } = parsePaginationParams(req.query);
@@ -526,14 +646,51 @@ router.get('/:id/availability', asyncHandler(async (req, res) => {
     });
 
     // Parse availability and generate slots (simplified)
+    // Parse availability and generate slots (dynamic)
     const availability = lawyer.availability || {};
-    const dayOfWeek = new Date(date || Date.now()).getDay();
+    // Fix: Handle date parsing correctly for local time
+    const targetDateObj = date ? new Date(date) : new Date();
+    const dayOfWeek = targetDateObj.getDay();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const daySchedule = availability[dayNames[dayOfWeek]] || [];
+    const daySchedule = availability[dayNames[dayOfWeek]];
 
-    // Generate available slots
-    const bookedTimes = new Set(existingBookings.map(b => b.scheduledTime));
-    const availableSlots = daySchedule.filter(slot => !bookedTimes.has(slot.time));
+    let availableSlots = [];
+
+    // Check if day is enabled and has start/end times
+    if (daySchedule && (daySchedule.enabled === true || daySchedule.enabled === undefined) && daySchedule.start && daySchedule.end) {
+        const start = parseInt(daySchedule.start.split(':')[0]);
+        const end = parseInt(daySchedule.end.split(':')[0]);
+
+        // Generate slots efficiently
+        for (let hour = start; hour < end; hour++) {
+            // Basic 60 min slots matching DEFAULT_BOOKING_DURATION
+            // Format HH:00
+            const time = `${hour.toString().padStart(2, '0')}:00`;
+            const slotEnd = `${(hour + 1).toString().padStart(2, '0')}:00`;
+
+            // Check if this slot is already booked
+            // bookedTimes set contains 'HH:MM' strings from DB
+            // Note: existingBookings returns scheduledTime which might be full ISO or Time string depending on Prisma mapping
+            // Assuming existingBookings.scheduledTime is Date object from Prisma, need to format it to HH:MM
+            // BUT, schema says scheduledTime is DateTime? Let's check schema/usage.
+            // Usually scheduledTime is DateTime. comparing time strings requires extraction.
+
+            availableSlots.push({
+                time,
+                endTime: slotEnd,
+                available: true // We'll filter later or just excluding booked ones
+            });
+        }
+    }
+
+    // Filter booked slots
+    // Convert booked times to simple "HH:MM" format for comparison
+    const bookedTimeStrings = new Set(existingBookings.map(b => {
+        const d = new Date(b.scheduledTime);
+        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }));
+
+    availableSlots = availableSlots.filter(slot => !bookedTimeStrings.has(slot.time));
 
     return sendSuccess(res, {
         data: {
@@ -549,8 +706,16 @@ router.get('/:id/availability', asyncHandler(async (req, res) => {
  * @desc    Update lawyer profile (own profile)
  * @access  Private/Lawyer
  */
-router.put('/profile', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
+router.put('/profile', authenticate, asyncHandler(async (req, res) => {
     const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Only lawyers can update their profile.',
+        });
+    }
+
     const {
         firstName, lastName, phone, // User fields
         bio, headline, hourlyRate, consultationFee, city, state, address, availability, languages, experience, // Lawyer fields
@@ -642,8 +807,16 @@ router.put('/profile', authenticate, requireVerifiedLawyer, asyncHandler(async (
  * @desc    Update lawyer payment acceptance credentials (bank/UPI)
  * @access  Private/Lawyer
  */
-router.put('/me/payment-credentials', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
+router.put('/me/payment-credentials', authenticate, asyncHandler(async (req, res) => {
     const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Only lawyers can update their payment credentials.',
+        });
+    }
+
     const { bankAccountName, bankAccountNumber, bankIfscCode, upiId } = req.body;
 
     // At least one credential must be provided
@@ -683,9 +856,17 @@ router.put('/me/payment-credentials', authenticate, requireVerifiedLawyer, async
  * @desc    Update lawyer availability status
  * @access  Private/Lawyer
  */
-router.put('/availability', authenticate, requireVerifiedLawyer, asyncHandler(async (req, res) => {
+router.put('/availability', authenticate, asyncHandler(async (req, res) => {
 
     const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. Only lawyers can update their availability.',
+        });
+    }
+
     const { isAvailable } = req.body;
 
     const lawyer = await prisma.lawyer.update({

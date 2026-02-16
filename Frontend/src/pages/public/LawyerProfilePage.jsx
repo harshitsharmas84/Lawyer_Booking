@@ -12,7 +12,9 @@ import { useAuth } from '../../context/AuthContext';
 export default function LawyerProfilePage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLawyer } = useAuth();
+
+
 
     const [lawyer, setLawyer] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -41,13 +43,13 @@ export default function LawyerProfilePage() {
 
                 // Check if favorite
                 if (isAuthenticated && user) {
-                   try {
-                       const favRes = await favoritesAPI.getByUser();
-                       const isFav = favRes.data.some(fav => fav.id === id || fav.lawyerId === id);
-                       setIsFavorite(isFav);
-                   } catch (e) {
-                       console.error("Error checking favorites", e);
-                   }
+                    try {
+                        const favRes = await favoritesAPI.getByUser();
+                        const isFav = favRes.data.some(fav => fav.id === id || fav.lawyerId === id);
+                        setIsFavorite(isFav);
+                    } catch (e) {
+                        console.error("Error checking favorites", e);
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -115,10 +117,29 @@ export default function LawyerProfilePage() {
                 url: window.location.href,
             }).catch((error) => console.log('Error sharing', error));
         } else {
-             // Fallback to clipboard
-             navigator.clipboard.writeText(window.location.href);
-             alert('Link copied to clipboard!');
+            // Fallback to clipboard
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copied to clipboard!');
         }
+    };
+
+    const handleBook = () => {
+        if (!isAuthenticated) {
+            navigate('/login', { state: { from: window.location.pathname } });
+            return;
+        }
+
+        if (isLawyer) {
+            alert("Lawyers cannot book appointments. Please login as a User to book.");
+            return;
+        }
+
+        navigate(`/lawyers/${id}/book`, {
+            state: {
+                date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+                time: selectedTime
+            }
+        });
     };
 
     if (loading) return (
@@ -222,7 +243,7 @@ export default function LawyerProfilePage() {
                             </div>
                         </div>
 
-                         {/* Quick Actions (Desktop) */}
+                        {/* Quick Actions (Desktop) */}
                         <div className="hidden md:block">
                             <button
                                 onClick={() => document.getElementById('booking-calendar').scrollIntoView({ behavior: 'smooth' })}
@@ -247,11 +268,10 @@ export default function LawyerProfilePage() {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`flex-1 py-4 text-sm font-semibold transition-all relative ${
-                                            activeTab === tab
+                                        className={`flex-1 py-4 text-sm font-semibold transition-all relative ${activeTab === tab
                                             ? 'text-blue-600 bg-blue-50/30'
                                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                        }`}
+                                            }`}
                                     >
                                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                         {activeTab === tab && (
@@ -298,9 +318,9 @@ export default function LawyerProfilePage() {
                                 )}
 
                                 {activeTab === 'experience' && (
-                                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                         {/* Assuming we might have experience data later, for now show placeholder or parse form bio if possible */}
-                                         <div className="flex gap-4">
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        {/* Assuming we might have experience data later, for now show placeholder or parse form bio if possible */}
+                                        <div className="flex gap-4">
                                             <div className="mt-1">
                                                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
                                                     <Award className="w-5 h-5" />
@@ -311,8 +331,8 @@ export default function LawyerProfilePage() {
                                                 <p className="text-gray-600">{lawyer.experience} Years of Experience</p>
                                                 <p className="text-sm text-gray-500 mt-1">Specializing in {lawyer.specialty?.join(', ')}</p>
                                             </div>
-                                         </div>
-                                     </div>
+                                        </div>
+                                    </div>
                                 )}
 
                                 {activeTab === 'education' && (
@@ -446,12 +466,7 @@ export default function LawyerProfilePage() {
                             {/* Book Button */}
                             <div className="mt-8 pt-6 border-t border-gray-100">
                                 <button
-                                    onClick={() => navigate(`/lawyers/${id}/book`, {
-                                        state: {
-                                            date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
-                                            time: selectedTime
-                                        }
-                                    })}
+                                    onClick={handleBook}
                                     className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 hover:shadow-blue-300 active:scale-99"
                                 >
                                     <span>Book Appointment</span>

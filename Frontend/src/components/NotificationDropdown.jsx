@@ -10,7 +10,8 @@ export default function NotificationDropdown({
     onClose,
     notifications = [],
     onMarkAllRead,
-    onNotificationClick
+    onNotificationClick,
+    onViewAll
 }) {
     const dropdownRef = useRef(null);
 
@@ -102,7 +103,10 @@ export default function NotificationDropdown({
 
             {/* Footer */}
             <div className="bg-gray-50 p-3 text-center border-t border-gray-100">
-                <button className="text-xs font-semibold text-[#0c1f3f] hover:text-[#cfa052] transition-colors uppercase tracking-wide">
+                <button
+                    onClick={onViewAll}
+                    className="text-xs font-semibold text-[#0c1f3f] hover:text-[#cfa052] transition-colors uppercase tracking-wide"
+                >
                     View All History
                 </button>
             </div>

@@ -111,8 +111,8 @@ const Login = () => {
           {/* Header */}
           <div className="flex flex-col items-center text-center space-y-2">
             <NyayBookerLogo size={60} />
-            <h1 className="text-2xl font-bold text-gray-900 mt-4">Welcome Back</h1>
-            <p className="text-sm text-gray-500">Sign in to your account to continue</p>
+            <h1 className="text-2xl font-bold text-gray-900 mt-4">Welcome</h1>
+            <p className="text-sm text-gray-500">Sign in Nyay Booker</p>
           </div>
 
 

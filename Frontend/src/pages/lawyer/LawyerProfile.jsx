@@ -31,11 +31,10 @@ export default function LawyerProfile() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const lawyerId = user?.lawyer?.id || user?.lawyerId;
-                if (!lawyerId) return;
+                if (!user) return;
 
                 const [{ data: profileData }, { data: areasData }] = await Promise.all([
-                    lawyerAPI.getById(lawyerId),
+                    lawyerAPI.getProfile(),
                     lawyerAPI.getPracticeAreas()
                 ]);
 
@@ -64,7 +63,17 @@ export default function LawyerProfile() {
     }, [user]);
 
     const handleChange = (field, value) => {
-        setProfile(prev => ({ ...prev, [field]: value }));
+        // Handle number inputs specifically to allow clearing them (empty string)
+        if (['experience', 'consultationFee', 'hourlyRate'].includes(field)) {
+            if (value === '' || value === null) {
+                setProfile(prev => ({ ...prev, [field]: '' }));
+                return;
+            }
+            const numValue = parseInt(value);
+            setProfile(prev => ({ ...prev, [field]: isNaN(numValue) ? '' : numValue }));
+        } else {
+            setProfile(prev => ({ ...prev, [field]: value }));
+        }
     };
 
     const handleSpecialtyToggle = (specialty) => {
@@ -114,6 +123,43 @@ export default function LawyerProfile() {
         }
     };
 
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Create FormData
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            setSaving(true);
+            setMessage({ type: '', text: '' });
+
+            // Upload to backend
+            // Assuming endpoint exists based on user routes or standard convention
+            // If specific endpoint unknown, we'll try '/users/avatar' or '/lawyers/profile/avatar'
+            // For now, let's use a standard pattern and if it fails we debug.
+            // Actually, let's assume we update the profile with the image URL if the backend handles upload separately
+            // OR we post to an upload endpoint. 
+            // Let's try to upload to /users/me/avatar if it exists, or just send the file to updateProfile if it supports multipart.
+            // Given the previous code didn't show upload logic, I'll assume we need to add handling.
+            // Let's try a common pattern: POST /users/avatar
+
+            const response = await apiClient.post('/users/avatar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            // Update profile with new image URL
+            setProfile(prev => ({ ...prev, image: response.data.data.avatar }));
+            setMessage({ type: 'success', text: 'Profile picture updated successfully!' });
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            setMessage({ type: 'error', text: 'Failed to upload image. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -154,9 +200,15 @@ export default function LawyerProfile() {
                 <div className="flex flex-col sm:flex-row items-start gap-6">
                     <div className="relative">
                         <img src={profile.image || '/default-avatar.png'} alt={profile.name} className="w-32 h-32 rounded-2xl object-cover bg-gray-100" />
-                        <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-700 transition-colors">
+                        <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-700 transition-colors cursor-pointer">
                             <Camera className="w-5 h-5" />
-                        </button>
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                            />
+                        </label>
                     </div>
                     <div className="flex-1 space-y-4 w-full">
                         <div>

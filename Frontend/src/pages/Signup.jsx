@@ -15,7 +15,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "", barNumber: "", barState: "", specialization: ""
+    firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "", barNumber: "", barState: "", specialization: "", customBarState: ""
   });
 
   const handleChange = (e) => {
@@ -64,7 +64,7 @@ const Signup = () => {
           password: formData.password,
           confirmPassword: formData.confirmPassword,
           barCouncilId: formData.barNumber,
-          barCouncilState: formData.barState || "Delhi",
+          barCouncilState: formData.barState === 'Other' ? formData.customBarState : (formData.barState || "Delhi"),
           enrollmentYear: new Date().getFullYear(),
         });
       } else {
@@ -243,9 +243,13 @@ const Signup = () => {
                   type="tel"
                   name="phone"
                   value={formData.phone}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setFormData({ ...formData, phone: value });
+                    setError("");
+                  }}
                   className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-sm text-gray-900"
-                  placeholder="+91 98765 43210"
+                  placeholder="9876543210"
                 />
               </div>
             </div>
@@ -273,8 +277,14 @@ const Signup = () => {
                     <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 group-focus-within:text-blue-600 transition-colors" />
                     <select
                       name="barState"
-                      value={formData.barState}
-                      onChange={handleChange}
+                      value={formData.barState === 'Other' || !["Delhi", "Maharashtra", "Karnataka", "Tamil Nadu", "Gujarat", "Uttar Pradesh", ""].includes(formData.barState) ? 'Other' : formData.barState}
+                      onChange={(e) => {
+                        if (e.target.value === 'Other') {
+                          setFormData({ ...formData, barState: 'Other', customBarState: '' });
+                        } else {
+                          setFormData({ ...formData, barState: e.target.value, customBarState: '' });
+                        }
+                      }}
                       className="w-full pl-9 pr-3 py-2.5 bg-white border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm text-gray-900 appearance-none"
                     >
                       <option value="">Select State</option>
@@ -288,6 +298,23 @@ const Signup = () => {
                     </select>
                   </div>
                 </div>
+
+                {formData.barState === 'Other' && (
+                  <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                    <label className="text-xs font-medium text-blue-800 ml-1">Specify Bar Council State</label>
+                    <div className="relative group">
+                      <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 group-focus-within:text-blue-600 transition-colors" />
+                      <input
+                        type="text"
+                        value={formData.customBarState || ''}
+                        onChange={(e) => setFormData({ ...formData, customBarState: e.target.value })}
+                        className="w-full pl-9 pr-3 py-2.5 bg-white border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-sm text-gray-900"
+                        placeholder="Enter state name"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -357,27 +384,31 @@ const Signup = () => {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-gray-50 px-2 text-gray-500">Or continue with</span>
-            </div>
-          </div>
+          {state !== "Lawyer" && (
+            <>
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gray-50 px-2 text-gray-500">Or continue with</span>
+                </div>
+              </div>
 
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="outline"
-              size="large"
-              text="signup_with"
-              width="100%"
-              locale="en"
-            />
-          </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  theme="outline"
+                  size="large"
+                  text="signup_with"
+                  width="100%"
+                  locale="en"
+                />
+              </div>
+            </>
+          )}
 
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}

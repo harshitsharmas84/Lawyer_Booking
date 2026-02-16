@@ -80,6 +80,7 @@ const LawyerCases = lazy(() => import("./pages/lawyer/LawyerCases"));
 const LawyerEarnings = lazy(() => import("./pages/lawyer/LawyerEarnings"));
 const LawyerDocuments = lazy(() => import("./pages/lawyer/LawyerDocuments"));
 const LawyerAvailability = lazy(() => import("./pages/lawyer/LawyerAvailability"));
+const LawyerNotifications = lazy(() => import("./pages/lawyer/LawyerNotifications"));
 
 // ═══════════════════════════════════════════════════════════════════════════
 // USER DASHBOARD PAGES
@@ -176,6 +177,7 @@ const router = createBrowserRouter([
 
           { path: "documents", element: withSuspense(LawyerDocuments) },
           { path: "availability", element: withSuspense(LawyerAvailability) },
+          { path: "notifications", element: withSuspense(LawyerNotifications) },
           { path: "chat", element: withSuspense(ChatPage) },
           { path: "cases/:id", element: withSuspense(CaseDetail) },
         ],

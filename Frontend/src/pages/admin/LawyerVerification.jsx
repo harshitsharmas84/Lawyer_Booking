@@ -20,7 +20,7 @@ export default function LawyerVerification() {
     const fetchPendingLawyers = async () => {
         try {
             const response = await apiClient.get('/admin/lawyers/pending');
-            setPendingLawyers(response.data.data.lawyers || []);
+            setPendingLawyers(response.data.data || []);
         } catch (error) {
             console.error('Failed to fetch pending lawyers:', error);
         } finally {
@@ -31,17 +31,16 @@ export default function LawyerVerification() {
     const handleVerify = async (lawyerId, status) => {
         setProcessingId(lawyerId);
         try {
+            const action = status === 'VERIFIED' ? 'approve' : 'reject';
             await apiClient.put(`/admin/lawyers/${lawyerId}/verify`, {
-                status,
-                notes: status === 'REJECTED' ? 'Documents could not be verified.' : undefined,
+                action,
+                rejectionReason: status === 'REJECTED' ? 'Documents could not be verified.' : undefined,
             });
             setPendingLawyers(pendingLawyers.filter(l => l.id !== lawyerId));
             setSelectedLawyer(null);
         } catch (error) {
             console.error('Failed to verify lawyer:', error);
-            // Demo removal
-            setPendingLawyers(pendingLawyers.filter(l => l.id !== lawyerId));
-            setSelectedLawyer(null);
+            // Do not remove from list on error
         } finally {
             setProcessingId(null);
         }

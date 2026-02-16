@@ -49,6 +49,49 @@ router.get('/profile', authenticate, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * @route   POST /api/v1/users/avatar
+ * @desc    Upload profile picture
+ * @access  Private
+ */
+router.post('/avatar', authenticate, asyncHandler(async (req, res) => {
+    try {
+        const { uploadAvatar, handleUpload } = await import('../../middleware/upload.js');
+        const { BadRequestError } = await import('../../utils/errors.js');
+        const { uploadToStorage } = await import('../../config/supabase.js');
+
+        // Wrap middleware in promise to handle async flow
+        await new Promise((resolve, reject) => {
+            handleUpload(uploadAvatar)(req, res, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
+        if (!req.file) {
+            throw new BadRequestError('No image file provided');
+        }
+
+        const prisma = getPrismaClient();
+
+        // Upload to storage (Supabase)
+        const avatarUrl = await uploadToStorage(req.file, 'avatars', req.user.id);
+
+        const user = await prisma.user.update({
+            where: { id: req.user.id },
+            data: { avatar: avatarUrl },
+            select: { id: true, avatar: true }
+        });
+
+        return sendSuccess(res, {
+            data: { avatar: user.avatar },
+            message: 'Profile picture updated'
+        });
+    } catch (error) {
+        throw error;
+    }
+}));
+
+/**
  * @route   PUT /api/v1/users/profile
  * @desc    Update current user's profile
  * @access  Private

@@ -25,7 +25,7 @@ export default function LawyerAvailability() {
         async function fetchData() {
             try {
                 const { data } = await lawyerAPI.getById(user?.lawyer?.id || user?.id);
-                setWorkingHours(data.workingHours || {});
+                setWorkingHours(data.availability || {});
             } catch (error) {
                 console.error('Error fetching availability:', error);
             } finally {
@@ -58,7 +58,7 @@ export default function LawyerAvailability() {
         setSaving(true);
         setMessage({ type: '', text: '' });
         try {
-            await lawyerAPI.updateProfile(user?.lawyer?.id || user?.id, { workingHours });
+            await lawyerAPI.updateProfile(user?.lawyer?.id || user?.id, { availability: workingHours });
             setMessage({ type: 'success', text: 'Availability updated successfully!' });
         } catch (error) {
             setMessage({ type: 'error', text: 'Failed to update. Please try again.' });

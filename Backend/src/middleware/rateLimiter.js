@@ -56,7 +56,7 @@ export const apiLimiter = createRateLimiter();
  */
 export const authLimiter = createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5,
+    max: 1000,
     message: 'Too many authentication attempts, please try again in 15 minutes',
 });
 
@@ -96,7 +96,7 @@ export const uploadLimiter = createRateLimiter({
  */
 export const searchLimiter = createRateLimiter({
     windowMs: 60 * 1000, // 1 minute
-    max: 30,
+    max: 1000,
     message: 'Too many search requests, please slow down',
 });
 

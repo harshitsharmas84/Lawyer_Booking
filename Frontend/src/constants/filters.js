@@ -1,12 +1,12 @@
 export const locations = [
-    'Bilaspur, HP',
-    'Shimla, HP',
-    'Mandi, HP',
-    'Kangra, HP',
-    'Dharamshala, HP',
-    'Kullu, HP',
-    'Solan, HP',
-    'Hamirpur, HP'
+    'Bilaspur, Himachal Pradesh',
+    'Shimla, Himachal Pradesh',
+    'Mandi, Himachal Pradesh',
+    'Kangra, Himachal Pradesh',
+    'Dharamshala, Himachal Pradesh',
+    'Kullu, Himachal Pradesh',
+    'Solan, Himachal Pradesh',
+    'Hamirpur, Himachal Pradesh'
 ];
 
 export const specialties = [

@@ -7,6 +7,11 @@ import apiClient from '../apiClient';
 
 
 export const lawyerAPI = {
+    async getProfile() {
+        const response = await apiClient.get('/lawyers/profile');
+        return response.data;
+    },
+
     async getAll(filters = {}) {
         const params = {};
         if (filters.limit) params.limit = filters.limit;
