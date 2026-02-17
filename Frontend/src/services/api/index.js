@@ -22,7 +22,7 @@ export const lawyerAPI = {
             if (cityParam) params.city = cityParam;
             if (stateParam) params.state = stateParam;
         }
-        if (filters.specialties && filters.specialties.length) params.specialization = filters.specialties[0];
+        if (filters.specialties && filters.specialties.length) params.specialization = filters.specialties.join(',');
         if (filters.costRange) {
             params.minRate = filters.costRange[0];
             params.maxRate = filters.costRange[1];
