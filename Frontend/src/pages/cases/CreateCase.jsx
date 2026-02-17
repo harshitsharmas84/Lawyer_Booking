@@ -95,8 +95,8 @@ export default function CreateCase() {
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="w-8 h-8 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Case Created!</h2>
-                    <p className="text-gray-600 mb-6">Your case has been created and assigned to the lawyer from your consultation.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Case Request Submitted!</h2>
+                    <p className="text-gray-600 mb-6">Your case request has been sent to the lawyer for approval. You'll be notified once they respond.</p>
                     <button
                         onClick={() => navigate('/user/cases')}
                         className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
@@ -116,8 +116,8 @@ export default function CreateCase() {
                     <ChevronLeft className="w-6 h-6" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Create a Case</h1>
-                    <p className="text-gray-600">Open a legal case from a completed consultation</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Request a Case</h1>
+                    <p className="text-gray-600">Submit a case request from a completed consultation</p>
                 </div>
             </div>
 
@@ -144,8 +144,8 @@ export default function CreateCase() {
                                     type="button"
                                     onClick={() => setForm(f => ({ ...f, bookingId: b.id }))}
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${form.bookingId === b.id
-                                            ? 'border-blue-500 bg-blue-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">
@@ -206,8 +206,8 @@ export default function CreateCase() {
                                 type="button"
                                 onClick={() => setForm(f => ({ ...f, priority: p.value }))}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${form.priority === p.value
-                                        ? `${p.color} ring-2 ring-offset-1 ring-blue-500`
-                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    ? `${p.color} ring-2 ring-offset-1 ring-blue-500`
+                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                     }`}
                             >
                                 {p.label}
@@ -231,7 +231,7 @@ export default function CreateCase() {
                         className="flex-1 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                     >
                         <Briefcase className="w-4 h-4" />
-                        {submitting ? 'Creating...' : 'Create Case'}
+                        {submitting ? 'Submitting...' : 'Submit Request'}
                     </button>
                 </div>
             </form>

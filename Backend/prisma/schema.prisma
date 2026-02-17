@@ -82,12 +82,14 @@ enum NotificationType {
 }
 
 enum CaseStatus {
+  REQUESTED
   OPEN
   IN_PROGRESS
   PENDING_DOCS
   UNDER_REVIEW
   CLOSED
   RESOLVED
+  REJECTED
 }
 
 enum CasePriority {

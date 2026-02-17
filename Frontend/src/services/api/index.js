@@ -225,6 +225,16 @@ export const caseAPI = {
         return response.data;
     },
 
+    async approve(id) {
+        const response = await apiClient.put(`/cases/${id}/approve`);
+        return response.data;
+    },
+
+    async reject(id, reason = '') {
+        const response = await apiClient.put(`/cases/${id}/reject`, { reason });
+        return response.data;
+    },
+
     async getHistory(id, page = 1, limit = 20) {
         const response = await apiClient.get(`/cases/${id}/history`, { params: { page, limit } });
         return response.data;

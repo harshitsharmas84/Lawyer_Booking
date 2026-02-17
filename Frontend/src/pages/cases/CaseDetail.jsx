@@ -16,11 +16,14 @@ const TABS = [
 ];
 
 const STATUS_MAP = {
+    REQUESTED: { label: 'Pending Approval', color: '#f59e0b' },
     OPEN: { label: 'Open', color: '#22c55e' },
     IN_PROGRESS: { label: 'In Progress', color: '#6366f1' },
-    PENDING_REVIEW: { label: 'Pending Review', color: '#f59e0b' },
+    PENDING_DOCS: { label: 'Pending Docs', color: '#f97316' },
+    UNDER_REVIEW: { label: 'Under Review', color: '#8b5cf6' },
     CLOSED: { label: 'Closed', color: '#94a3b8' },
-    CANCELLED: { label: 'Cancelled', color: '#ef4444' },
+    RESOLVED: { label: 'Resolved', color: '#10b981' },
+    REJECTED: { label: 'Declined', color: '#ef4444' },
 };
 
 export default function CaseDetail() {
