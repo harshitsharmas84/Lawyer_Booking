@@ -36,6 +36,16 @@ router.get('/profile', authenticate, asyncHandler(async (req, res) => {
             isPhoneVerified: true,
             createdAt: true,
             updatedAt: true,
+            lawyer: {
+                select: {
+                    id: true,
+                    slug: true,
+                    isAvailable: true,
+                    availability: true,
+                    blockedPeriods: true,
+                    verificationStatus: true,
+                }
+            },
         },
     });
 

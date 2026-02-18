@@ -238,6 +238,7 @@ model Lawyer {
   reviews             Review[]            @relation("ReviewSubject")
   cases               Case[]
   savedBy             SavedLawyer[]
+  blockedPeriods      BlockedPeriod[]
   
   @@index([barCouncilId])
   @@index([verificationStatus])
@@ -246,6 +247,29 @@ model Lawyer {
   @@index([hourlyRate])
   @@index([slug])
   @@map("lawyers")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BLOCKED PERIOD MODEL (Availability Exceptions)
+// ═══════════════════════════════════════════════════════════════════════════
+
+model BlockedPeriod {
+  id        String   @id @default(uuid())
+  lawyerId  String   @map("lawyer_id")
+  
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  reason    String?
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  lawyer    Lawyer   @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+
+  @@index([lawyerId, startDate])
+  @@map("blocked_periods")
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

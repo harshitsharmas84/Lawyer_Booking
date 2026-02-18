@@ -75,6 +75,7 @@ router.get('/profile', authenticate, asyncHandler(async (req, res) => {
                     },
                 },
             },
+            blockedPeriods: true,
         },
     });
 
@@ -115,7 +116,11 @@ router.get('/profile', authenticate, asyncHandler(async (req, res) => {
         casesWon: lawyer.completedBookings || 0,
         completedConsultations: lawyer.completedBookings,
         isAvailable: lawyer.isAvailable,
-        availability: lawyer.availability,
+        completedConsultations: lawyer.completedBookings,
+        isAvailable: lawyer.isAvailable,
+        availability: lawyer.availability || {},
+        availabilityStatus: lawyer.isAvailable ? 'Available' : 'Busy',
+        blockedPeriods: lawyer.blockedPeriods || [],
         verificationStatus: lawyer.verificationStatus,
         specialty: lawyer.specializations.map(s => s.practiceArea.name),
         specializations: lawyer.specializations.map(s => ({
@@ -302,7 +307,8 @@ router.get('/', searchLimiter, optionalAuth, asyncHandler(async (req, res) => {
         averageRating: lawyer.averageRating,
         totalReviews: lawyer.totalReviews,
         isAvailable: lawyer.isAvailable,
-        availability: lawyer.isAvailable ? 'Available' : 'Busy',
+        availability: lawyer.availability || {},
+        availabilityStatus: lawyer.isAvailable ? 'Available' : 'Busy',
         featured: lawyer.featured,
         casesWon: lawyer.completedBookings || 0,
         completedBookings: lawyer.completedBookings,
@@ -390,7 +396,8 @@ router.get('/featured', asyncHandler(async (req, res) => {
         completedBookings: lawyer.completedBookings,
         specialty: lawyer.specializations[0]?.practiceArea?.name ? [lawyer.specializations[0].practiceArea.name] : [],
         primarySpecialization: lawyer.specializations[0]?.practiceArea?.name || null,
-        availability: 'Available', // Featured are usually available
+        availability: lawyer.availability || {},
+        availabilityStatus: 'Available', // Featured are usually available
     }));
 
     return sendSuccess(res, { data: transformed });
@@ -573,7 +580,12 @@ router.get('/:slugOrId', optionalAuth, asyncHandler(async (req, res) => {
         casesWon: lawyer.completedBookings || 0,
         completedConsultations: lawyer.completedBookings,
         isAvailable: lawyer.isAvailable,
-        availability: lawyer.isAvailable ? 'Available' : 'Busy',
+        casesWon: lawyer.completedBookings || 0,
+        completedConsultations: lawyer.completedBookings,
+        isAvailable: lawyer.isAvailable,
+        availability: lawyer.availability || {}, // Return actual availability object (schedule)
+        availabilityStatus: lawyer.isAvailable ? 'Available' : 'Busy', // New field for status string
+        blockedPeriods: lawyer.blockedPeriods || [],
         specialty: lawyer.specializations.map(s => s.practiceArea.name),
         specializations: lawyer.specializations.map(s => ({
             ...s.practiceArea,
@@ -879,6 +891,86 @@ router.put('/availability', authenticate, asyncHandler(async (req, res) => {
     return sendSuccess(res, {
         data: lawyer,
         message: `Availability ${isAvailable ? 'enabled' : 'disabled'}`,
+    });
+}));
+
+/**
+ * @route   POST /api/v1/lawyers/blocked-dates
+ * @desc    Add a blocked period
+ * @access  Private/Lawyer
+ */
+router.post('/blocked-dates', authenticate, asyncHandler(async (req, res) => {
+    const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
+    const { startDate, endDate, reason } = req.body;
+
+    if (!startDate || !endDate) {
+        return res.status(400).json({ success: false, message: 'Start date and end date are required.' });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({ success: false, message: 'Invalid date format.' });
+    }
+
+    if (start > end) {
+        return res.status(400).json({ success: false, message: 'Start date cannot be after end date.' });
+    }
+
+    const lawyer = await prisma.lawyer.findUnique({ where: { userId: req.user.id } });
+
+    const blockedPeriod = await prisma.blockedPeriod.create({
+        data: {
+            lawyerId: lawyer.id,
+            startDate: start,
+            endDate: end,
+            reason
+        }
+    });
+
+    return sendSuccess(res, {
+        data: blockedPeriod,
+        message: 'Blocked period added successfully'
+    });
+}));
+
+/**
+ * @route   DELETE /api/v1/lawyers/blocked-dates/:id
+ * @desc    Remove a blocked period
+ * @access  Private/Lawyer
+ */
+router.delete('/blocked-dates/:id', authenticate, asyncHandler(async (req, res) => {
+    const prisma = getPrismaClient();
+
+    if (req.user.role !== 'LAWYER') {
+        return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
+    const { id } = req.params;
+
+    const blockedPeriod = await prisma.blockedPeriod.findUnique({
+        where: { id },
+        include: { lawyer: true }
+    });
+
+    if (!blockedPeriod) {
+        return res.status(404).json({ success: false, message: 'Blocked period not found.' });
+    }
+
+    if (blockedPeriod.lawyer.userId !== req.user.id) {
+        return res.status(403).json({ success: false, message: 'Unauthorized to delete this blocked period.' });
+    }
+
+    await prisma.blockedPeriod.delete({ where: { id } });
+
+    return sendSuccess(res, {
+        message: 'Blocked period removed successfully'
     });
 }));
 

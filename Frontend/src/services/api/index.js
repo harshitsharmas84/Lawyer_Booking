@@ -51,7 +51,7 @@ export const lawyerAPI = {
             casesWon: lawyer.completedBookings || 0,
             specialty: lawyer.specializations ? lawyer.specializations.map(s => s.name) : [],
             avgCostPerCase: parseFloat(lawyer.hourlyRate),
-            availability: lawyer.isAvailable ? 'Available' : 'Busy',
+            availability: lawyer.availabilityStatus || (lawyer.isAvailable ? 'Available' : 'Busy'),
             rating: lawyer.averageRating || 0,
             description: lawyer.headline || lawyer.bio || 'Experienced Lawyer'
         }));
@@ -148,6 +148,16 @@ export const lawyerAPI = {
 
     async getAvailability(lawyerId, date) {
         const response = await apiClient.get(`/lawyers/${lawyerId}/availability`, { params: { date } });
+        return response.data;
+    },
+
+    async addBlockedDate(data) {
+        const response = await apiClient.post('/lawyers/blocked-dates', data);
+        return response.data;
+    },
+
+    async removeBlockedDate(id) {
+        const response = await apiClient.delete(`/lawyers/blocked-dates/${id}`);
         return response.data;
     },
 };
@@ -437,4 +447,7 @@ export const userAPI = {
     },
 };
 
+
+
 export default { lawyer: lawyerAPI, appointment: appointmentAPI, case: caseAPI, client: clientAPI, payment: paymentAPI, notification: notificationAPI, document: documentAPI, favorites: favoritesAPI, chat: chatAPI, user: userAPI };
+
