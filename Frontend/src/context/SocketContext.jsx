@@ -10,23 +10,32 @@ const SocketContext = createContext(null);
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000';
 
 export function SocketProvider({ children }) {
-    const { token, user } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const socketRef = useRef(null);
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-        if (!token || !user) return;
+        const token = localStorage.getItem('nyaybooker_access_token');
+        if (!isAuthenticated || !user || !token) return;
 
         const socket = io(SOCKET_URL, {
             auth: { token },
-            transports: ['websocket', 'polling'],
+            transports: ['websocket', 'polling'], // Try websocket first
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 2000,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
         });
 
-        socket.on('connect', () => setConnected(true));
-        socket.on('disconnect', () => setConnected(false));
+        socket.on('connect', () => {
+            console.log('[Socket] Connected');
+            setConnected(true);
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.warn('[Socket] Disconnected:', reason);
+            setConnected(false);
+        });
+
         socket.on('connect_error', (err) => {
             console.warn('[Socket] Connection error:', err.message);
         });
@@ -38,7 +47,7 @@ export function SocketProvider({ children }) {
             socketRef.current = null;
             setConnected(false);
         };
-    }, [token, user]);
+    }, [isAuthenticated, user]);
 
     const joinCase = useCallback((caseId) => {
         socketRef.current?.emit('join_case', caseId);

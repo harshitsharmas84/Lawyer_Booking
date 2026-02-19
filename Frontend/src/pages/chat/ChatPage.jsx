@@ -123,7 +123,7 @@ function ChatWindow({ caseId, messages, onSend, typingUser, loading }) {
                     if (item.type === 'date') {
                         return <div key={`d-${i}`} className="chat-date-divider"><span>{item.label}</span></div>;
                     }
-                    const isOwn = item.senderId === user?.id;
+                    const isOwn = (item.sender?.id || item.senderId) === user?.id;
                     return (
                         <div key={item.id || i} className={`chat-bubble ${isOwn ? 'chat-bubble--own' : 'chat-bubble--other'}`}>
                             <div className="chat-bubble__content">{item.content}</div>
