@@ -64,13 +64,19 @@ export const lawyerAPI = {
             const { data } = await apiClient.get(`/lawyers/${id}`);
             const lawyer = data.data;
 
+            // Normalize availability keys to lowercase ONCE at the API boundary.
+            // Backend stores capitalized keys (e.g., "Monday"), but CalendarView
+            // uses JS Date.getDay() which maps to lowercase day names.
+            const normalizedAvailability = Object.keys(lawyer.availability || {}).reduce((acc, key) => {
+                acc[key.toLowerCase()] = lawyer.availability[key];
+                return acc;
+            }, {});
+
             return {
                 data: {
                     ...lawyer,
                     image: lawyer.avatar,
-                    specialty: lawyer.specializations?.map(s => s.name) || [],
-                    casesWon: lawyer.completedConsultations,
-                    location: lawyer.city && lawyer.state ? `${lawyer.city}, ${lawyer.state}` : lawyer.city || lawyer.state || 'Location not available',
+                    availability: normalizedAvailability,
                 }
             };
         } catch (error) {

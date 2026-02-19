@@ -45,10 +45,6 @@ export default function LawyerProfilePage() {
     const [loadingSlots, setLoadingSlots] = useState(false);
 
     // Generate next 7 days for the calendar
-
-
-
-
     useEffect(() => {
         const fetchLawyer = async () => {
             try {
@@ -457,13 +453,17 @@ export default function LawyerProfilePage() {
                             {/* Availability Calendar */}
                             <div className="mb-8">
                                 <h3 className="text-xl font-bold text-gray-900 mb-6">Check Availability</h3>
+
                                 <CalendarView
                                     selectedDate={selectedDate}
                                     onDateChange={(date) => {
                                         setSelectedDate(date);
                                         setSelectedTime(null);
                                     }}
+                                    blockedDates={lawyer.blockedPeriods || []}
+                                    availability={lawyer.availability || {}}
                                 />
+
                             </div>
 
                             {/* Time Slots */}

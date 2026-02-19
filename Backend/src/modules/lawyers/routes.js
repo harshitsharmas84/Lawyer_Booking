@@ -541,6 +541,7 @@ router.get('/:slugOrId', optionalAuth, asyncHandler(async (req, res) => {
                     },
                 },
             },
+            blockedPeriods: true,
         },
     });
 
@@ -638,32 +639,51 @@ router.get('/:id/availability', asyncHandler(async (req, res) => {
         return sendSuccess(res, { data: { slots: [], message: 'Lawyer is not available' } });
     }
 
-    // Get existing bookings for the date
-    const targetDate = date ? new Date(date) : new Date();
-    const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+    // Date handling
+    const targetDateStr = date || new Date().toISOString().split('T')[0];
+    const targetDate = new Date(targetDateStr);
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
-    const existingBookings = await prisma.booking.findMany({
-        where: {
-            lawyerId: id,
-            scheduledDate: {
-                gte: startOfDay,
-                lte: endOfDay,
+    // Fetch existing bookings AND blocked periods
+    const [existingBookings, blockedPeriods] = await Promise.all([
+        prisma.booking.findMany({
+            where: {
+                lawyerId: id,
+                scheduledDate: {
+                    gte: startOfDay,
+                    lte: endOfDay,
+                },
+                status: { in: ['PENDING', 'CONFIRMED'] },
             },
-            status: { in: ['PENDING', 'CONFIRMED'] },
-        },
-        select: {
-            scheduledTime: true,
-            duration: true,
-        },
-    });
+            select: {
+                scheduledTime: true,
+                duration: true,
+            },
+        }),
+        prisma.blockedPeriod.findMany({
+            where: {
+                lawyerId: id,
+                // Check for any overlap with the target day
+                OR: [
+                    {
+                        startDate: { lte: endOfDay },
+                        endDate: { gte: startOfDay },
+                    }
+                ]
+            },
+            select: {
+                startDate: true,
+                endDate: true,
+            }
+        })
+    ]);
 
-    // Parse availability and generate slots (simplified)
     // Parse availability and generate slots (dynamic)
     const availability = lawyer.availability || {};
-    // Fix: Handle date parsing correctly for local time
-    const targetDateObj = date ? new Date(date) : new Date();
-    const dayOfWeek = targetDateObj.getDay();
+    const dayOfWeek = targetDate.getDay();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const daySchedule = availability[dayNames[dayOfWeek]];
 
@@ -674,40 +694,60 @@ router.get('/:id/availability', asyncHandler(async (req, res) => {
         const start = parseInt(daySchedule.start.split(':')[0]);
         const end = parseInt(daySchedule.end.split(':')[0]);
 
-        // Generate slots efficiently
+        // Generate slots
         for (let hour = start; hour < end; hour++) {
             // Basic 60 min slots matching DEFAULT_BOOKING_DURATION
-            // Format HH:00
             const time = `${hour.toString().padStart(2, '0')}:00`;
-            const slotEnd = `${(hour + 1).toString().padStart(2, '0')}:00`;
+            const slotStart = new Date(startOfDay);
+            slotStart.setHours(hour, 0, 0, 0);
 
-            // Check if this slot is already booked
+            const slotEnd = new Date(startOfDay);
+            slotEnd.setHours(hour + 1, 0, 0, 0);
+
+            // 1. Check against Bookings
             // bookedTimes set contains 'HH:MM' strings from DB
-            // Note: existingBookings returns scheduledTime which might be full ISO or Time string depending on Prisma mapping
-            // Assuming existingBookings.scheduledTime is Date object from Prisma, need to format it to HH:MM
-            // BUT, schema says scheduledTime is DateTime? Let's check schema/usage.
-            // Usually scheduledTime is DateTime. comparing time strings requires extraction.
+            // We'll construct a check later or do it here.
+            // Let's rely on string comparison for bookings as before, consistent with existing logic
 
-            availableSlots.push({
-                time,
-                endTime: slotEnd,
-                available: true // We'll filter later or just excluding booked ones
+            // 2. Check against Blocked Periods
+            // A slot is blocked if it overlaps with any blocked period
+            const isBlocked = blockedPeriods.some(bp => {
+                const bpStart = new Date(bp.startDate);
+                const bpEnd = new Date(bp.endDate);
+                // Overlap condition: (StartA < EndB) && (EndA > StartB)
+                return slotStart < bpEnd && slotEnd > bpStart;
             });
+
+            if (!isBlocked) {
+                availableSlots.push({
+                    time,
+                    endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+                    available: true
+                });
+            }
         }
     }
 
     // Filter booked slots
     // Convert booked times to simple "HH:MM" format for comparison
     const bookedTimeStrings = new Set(existingBookings.map(b => {
-        const d = new Date(b.scheduledTime);
-        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        // Assuming scheduledTime is saved as full ISO string or we parse it
+        // The previous code did `new Date(b.scheduledTime)`. If it's just "HH:mm" string in DB, this might fail or be weird.
+        // Prisma schema says scheduledTime is DateTime.
+        // If it's a string like "10:00", `new Date("10:00")` is invalid.
+        // It should probably be:
+        if (b.scheduledTime.includes('T')) {
+            const d = new Date(b.scheduledTime);
+            return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+        return b.scheduledTime.substring(0, 5); // "10:00"
     }));
 
     availableSlots = availableSlots.filter(slot => !bookedTimeStrings.has(slot.time));
 
     return sendSuccess(res, {
         data: {
-            date: date || new Date().toISOString().split('T')[0],
+            date: targetDateStr,
             slots: availableSlots,
             bookedSlots: existingBookings.length,
         }
@@ -912,8 +952,13 @@ router.post('/blocked-dates', authenticate, asyncHandler(async (req, res) => {
         return res.status(400).json({ success: false, message: 'Start date and end date are required.' });
     }
 
+
     const start = new Date(startDate);
     const end = new Date(endDate);
+
+    // Ensure end date covers the full day
+    end.setHours(23, 59, 59, 999);
+
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return res.status(400).json({ success: false, message: 'Invalid date format.' });
