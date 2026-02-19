@@ -149,7 +149,7 @@ export default function CaseDetail() {
             setPaymentAmount('');
             setPaymentDescription('');
         } catch (err) {
-            setPaymentError(err.response?.data?.error || 'Failed to send payment request');
+            setPaymentError(err.response?.data?.message || 'Failed to send payment request');
         } finally {
             setSubmittingPayment(false);
         }
@@ -163,7 +163,7 @@ export default function CaseDetail() {
             const res = await casePaymentAPI.getCasePayments(id);
             setPayments(res.data || []);
         } catch (err) {
-            alert(err.response?.data?.error || 'Payment failed');
+            alert(err.response?.data?.message || 'Payment failed');
         } finally {
             setActionLoading(null);
         }
@@ -177,7 +177,7 @@ export default function CaseDetail() {
             const res = await casePaymentAPI.getCasePayments(id);
             setPayments(res.data || []);
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to deny payment');
+            alert(err.response?.data?.message || 'Failed to deny payment');
         } finally {
             setActionLoading(null);
         }
