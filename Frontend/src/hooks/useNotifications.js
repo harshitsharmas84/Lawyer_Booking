@@ -50,9 +50,8 @@ export function useNotifications(userId, userType) {
 
     const markAllAsRead = async () => {
         try {
-            const unread = notifications.filter(n => !n.read);
-            await Promise.all(unread.map(n => notificationAPI.markAsRead(n.id)));
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            await notificationAPI.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
             setUnreadCount(0);
         } catch (error) {
             console.error('Error marking all notifications as read:', error);

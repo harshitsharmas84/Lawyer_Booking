@@ -24,7 +24,9 @@ export default function DashboardNavbar({
     role = 'user',
     user,
     unreadCount = 0,
+    notifications = [],
     onLogout,
+    onMarkAllRead,
     onNotificationClick
 }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -157,9 +159,9 @@ export default function DashboardNavbar({
                             <NotificationDropdown
                                 isOpen={isNotificationOpen}
                                 onClose={() => setIsNotificationOpen(false)}
-                                notifications={[]} // TODO: Fetch real notifications
-                                onMarkAllRead={() => console.log('Mark all read')}
-                                onNotificationClick={() => navigate('/user/notifications')}
+                                notifications={notifications}
+                                onMarkAllRead={onMarkAllRead}
+                                onNotificationClick={handleNotificationClick}
                             />
                         </div>
 

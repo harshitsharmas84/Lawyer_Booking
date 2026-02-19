@@ -35,7 +35,7 @@ export default function LawyerNotifications() {
     const handleMarkRead = async (id) => {
         try {
             await notificationAPI.markAsRead(id);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         } catch (error) {
             console.error('Error marking notification:', error);
         }
@@ -43,19 +43,19 @@ export default function LawyerNotifications() {
 
     const handleMarkAllRead = async () => {
         try {
-            await Promise.all(notifications.filter(n => !n.read).map(n => notificationAPI.markAsRead(n.id)));
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            await notificationAPI.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         } catch (error) {
             console.error('Error marking all notifications:', error);
         }
     };
 
-    const unreadCount = notifications.filter(n => !n.read).length;
-    const readCount = notifications.filter(n => n.read).length;
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    const readCount = notifications.filter(n => n.isRead).length;
 
     const filteredNotifications = filter === 'all' ? notifications :
-        filter === 'unread' ? notifications.filter(n => !n.read) :
-            notifications.filter(n => n.read);
+        filter === 'unread' ? notifications.filter(n => !n.isRead) :
+            notifications.filter(n => n.isRead);
 
     if (loading) {
         return <div className="flex items-center justify-center h-64"><div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;

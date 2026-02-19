@@ -262,6 +262,8 @@ export default function DashboardLayout({ role = 'user' }) {
                     role={role}
                     user={user}
                     unreadCount={unreadCount}
+                    notifications={notifications}
+                    onMarkAllRead={markAllAsRead}
                     onLogout={handleLogout}
                 />
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
