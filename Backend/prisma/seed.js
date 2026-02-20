@@ -110,7 +110,7 @@ const TEST_LAWYERS = [
             experience: 6,
             hourlyRate: 2500,
             consultationFee: 1000,
-            city: 'Manali',
+            city: 'Hamirpur',
             state: 'Himachal Pradesh',
             isAvailable: true,
             verificationStatus: 'VERIFIED',
