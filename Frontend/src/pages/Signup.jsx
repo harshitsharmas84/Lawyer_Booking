@@ -32,8 +32,9 @@ const Signup = () => {
       setError("Please enter a valid email address");
       return false;
     }
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+    const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]|_)\S{8,}$/;
+    if (!PASSWORD_REGEX.test(formData.password)) {
+      setError("Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character");
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -42,6 +43,10 @@ const Signup = () => {
     }
     if (state === "Lawyer" && !formData.barNumber.trim()) {
       setError("Bar registration number is required for lawyers");
+      return false;
+    }
+    if (state === "Lawyer" && !formData.phone.trim()) {
+      setError("Phone number is required for lawyers");
       return false;
     }
     return true;
@@ -60,7 +65,7 @@ const Signup = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          phone: formData.phone,
+          ...(formData.phone ? { phone: formData.phone } : {}),
           password: formData.password,
           confirmPassword: formData.confirmPassword,
           barCouncilId: formData.barNumber,
@@ -72,7 +77,7 @@ const Signup = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          phone: formData.phone,
+          ...(formData.phone ? { phone: formData.phone } : {}),
           password: formData.password,
           confirmPassword: formData.confirmPassword,
         });

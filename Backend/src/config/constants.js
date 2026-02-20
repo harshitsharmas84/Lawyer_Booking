@@ -248,7 +248,7 @@ export const CACHE_TTL = Object.freeze({
 export const REGEX = Object.freeze({
     EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     PHONE_INDIA: /^(\+91[\-\s]?)?[6-9]\d{9}$/,
-    PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+    PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]|_)\S{8,}$/,
     BAR_COUNCIL_ID: /^[A-Z]{2,3}\/\d{4,6}\/\d{4}$/,
     UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
