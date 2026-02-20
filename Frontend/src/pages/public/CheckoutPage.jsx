@@ -215,7 +215,6 @@ export default function CheckoutPage() {
                     scheduledTime: booking.time,
                     duration: booking.duration || 60,
                     meetingType: booking.type?.toUpperCase() || booking.meetingType || 'VIDEO',
-                    amount: parseFloat(amount),
                     clientNotes: booking.notes || '',
                     paymentMethod: 'CARD',
                 });
