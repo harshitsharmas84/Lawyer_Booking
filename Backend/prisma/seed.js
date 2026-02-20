@@ -88,6 +88,8 @@ const TEST_LAWYERS = [
             isAvailable: true,
             verificationStatus: 'VERIFIED',
             specializations: ['criminal-lawyer', 'civil-lawyer'],
+            averageRating: 4.9,
+            totalReviews: 42,
         },
     },
     {
@@ -113,6 +115,8 @@ const TEST_LAWYERS = [
             isAvailable: true,
             verificationStatus: 'VERIFIED',
             specializations: ['family-lawyer', 'civil-lawyer'],
+            averageRating: 5.0,
+            totalReviews: 28,
         },
     },
     {
@@ -140,6 +144,8 @@ const TEST_LAWYERS = [
             featured: true,
             featuredOrder: 1,
             specializations: ['corporate-lawyer', 'tax-law'],
+            averageRating: 4.8,
+            totalReviews: 56,
         },
     },
     {
@@ -165,6 +171,8 @@ const TEST_LAWYERS = [
             isAvailable: true,
             verificationStatus: 'VERIFIED',
             specializations: ['real-estate-law', 'civil-lawyer'],
+            averageRating: 4.7,
+            totalReviews: 31,
         },
     },
     {
@@ -190,6 +198,8 @@ const TEST_LAWYERS = [
             isAvailable: true,
             verificationStatus: 'VERIFIED',
             specializations: ['tax-law', 'corporate-lawyer'],
+            averageRating: 4.9,
+            totalReviews: 19,
         },
     },
     {
@@ -217,6 +227,8 @@ const TEST_LAWYERS = [
             featured: true,
             featuredOrder: 2,
             specializations: ['immigration-law'],
+            averageRating: 4.6,
+            totalReviews: 87,
         },
     },
 ];
@@ -330,6 +342,8 @@ async function seedTestLawyers() {
                 state: data.lawyer.state,
                 barCouncilId: data.lawyer.barCouncilId,
                 barCouncilState: data.lawyer.barCouncilState,
+                averageRating: data.lawyer.averageRating,
+                totalReviews: data.lawyer.totalReviews,
             },
             create: {
                 userId: user.id,
@@ -348,6 +362,8 @@ async function seedTestLawyers() {
                 verifiedAt: data.lawyer.verificationStatus === 'VERIFIED' ? new Date() : null,
                 featured: data.lawyer.featured || false,
                 featuredOrder: data.lawyer.featuredOrder,
+                averageRating: data.lawyer.averageRating,
+                totalReviews: data.lawyer.totalReviews,
                 availability: {
                     monday: [{ time: '09:00', duration: 60 }, { time: '10:00', duration: 60 }, { time: '14:00', duration: 60 }, { time: '15:00', duration: 60 }],
                     tuesday: [{ time: '09:00', duration: 60 }, { time: '10:00', duration: 60 }, { time: '14:00', duration: 60 }, { time: '15:00', duration: 60 }],
@@ -448,64 +464,44 @@ async function seedSampleBookingsAndReviews() {
                 },
             });
 
-            // Create review (70% chance)
-            if (Math.random() > 0.3) {
-                const ratings = [4, 4, 4, 5, 5, 5, 5, 3];
-                const rating = ratings[Math.floor(Math.random() * ratings.length)];
+            // Create review (100% chance for 5 stars)
+            const reviewTitles = [
+                'Excellent experience!',
+                'Very helpful consultation',
+                'Professional and knowledgeable',
+                'Highly recommended',
+                'Good advice received',
+                'Great advocate',
+            ];
 
-                const reviewTitles = [
-                    'Excellent experience!',
-                    'Very helpful consultation',
-                    'Professional and knowledgeable',
-                    'Highly recommended',
-                    'Good advice received',
-                    'Great advocate',
-                ];
+            const reviewContents = [
+                'The advocate was very professional and explained everything clearly. Would definitely recommend.',
+                'Got great legal advice. The consultation was worth every rupee. Very satisfied with the service.',
+                'Very knowledgeable about the subject matter. Answered all my questions patiently.',
+                'Excellent service! The lawyer took time to understand my case thoroughly.',
+                'Professional approach and practical solutions. Happy with the consultation.',
+                'The advocate provided clear guidance on my legal matter. Will consult again if needed.',
+            ];
 
-                const reviewContents = [
-                    'The advocate was very professional and explained everything clearly. Would definitely recommend.',
-                    'Got great legal advice. The consultation was worth every rupee. Very satisfied with the service.',
-                    'Very knowledgeable about the subject matter. Answered all my questions patiently.',
-                    'Excellent service! The lawyer took time to understand my case thoroughly.',
-                    'Professional approach and practical solutions. Happy with the consultation.',
-                    'The advocate provided clear guidance on my legal matter. Will consult again if needed.',
-                ];
+            await prisma.review.create({
+                data: {
+                    bookingId: booking.id,
+                    authorId: user.id,
+                    lawyerId: lawyer.id,
+                    rating: 5,
+                    title: reviewTitles[Math.floor(Math.random() * reviewTitles.length)],
+                    content: reviewContents[Math.floor(Math.random() * reviewContents.length)],
+                    isVerified: true,
+                    isPublished: true,
+                },
+            });
 
-                await prisma.review.create({
-                    data: {
-                        bookingId: booking.id,
-                        authorId: user.id,
-                        lawyerId: lawyer.id,
-                        rating,
-                        title: reviewTitles[Math.floor(Math.random() * reviewTitles.length)],
-                        content: reviewContents[Math.floor(Math.random() * reviewContents.length)],
-                        isVerified: true,
-                        isPublished: true,
-                    },
-                });
-
-                reviewsCreated++;
-            }
+            reviewsCreated++;
         }
     }
 
-    // Update lawyer ratings
-    for (const lawyer of lawyers) {
-        const aggregation = await prisma.review.aggregate({
-            where: { lawyerId: lawyer.id, isPublished: true },
-            _avg: { rating: true },
-            _count: { rating: true },
-        });
-
-        await prisma.lawyer.update({
-            where: { id: lawyer.id },
-            data: {
-                averageRating: aggregation._avg.rating || 0,
-                totalReviews: aggregation._count.rating || 0,
-                completedBookings: { increment: aggregation._count.rating },
-            },
-        });
-    }
+    // We are now using hardcoded averageRating and totalReviews for the lawyers
+    // so we don't need to dynamically calculate them here anymore.
 
     console.log(`✅ ${bookingsCreated} bookings and ${reviewsCreated} reviews seeded`);
 }
